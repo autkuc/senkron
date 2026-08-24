@@ -1,0 +1,85 @@
+# ==============================================================================
+# Senkron Production .gitignore
+# ==============================================================================
+
+# --- AI & Machine Learning Artifacts ---
+# Model checkpoints, weights, and LoRA adapters
+*.gguf
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.onnx
+*.lora
+checkpoints/
+models/
+/models/
+/models/*
+senkron-model-store/
+senkron-turkish-lora/
+senkron-turkish-llama3.2*
+ollama-models/
+
+# Datasets and training caches
+*.jsonl
+*.arrow
+/ai/training/data/
+/ai/training/dataset/
+/data/
+/dataset/
+turkish_nsosyal_dataset.json
+sample_dataset.json
+
+# Modal & Python virtual environments
+.modal/
+.modal.toml
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist-py/
+
+# --- Environment & Secret Variables ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# --- Node & Web Build Artifacts ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js & Frontend outputs
+.next/
+out/
+build/
+.turbo/
+
+# Vite / Package distribution outputs (unbundled source in src/)
+# /ai/dist/
+# /components/dist/
+# /backend/dist/
+
+# Logs & OS artifacts
+logs/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,43 @@
+import { LitElement, PropertyValues } from 'lit';
+
+export declare class SenkronVideoEditor extends LitElement {
+    static styles: import('lit').CSSResult;
+    src: string;
+    aspectRatio: string;
+    theme: string;
+    autoplay: boolean;
+    modalMode: boolean;
+    private isPlaying;
+    private currentTime;
+    private duration;
+    private trimStart;
+    private trimEnd;
+    private overlays;
+    private newOverlayText;
+    private isExporting;
+    private exportProgress;
+    private exportedVideoUrl;
+    private ffmpegService;
+    private animationFrameId;
+    private get videoEl();
+    private get canvasEl();
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    protected firstUpdated(_changedProperties: PropertyValues): void;
+    protected updated(changedProperties: PropertyValues): void;
+    private setupCanvas;
+    private renderFrame;
+    private handleVideoLoaded;
+    private handleTimeUpdate;
+    private togglePlay;
+    private handleSeek;
+    private setTrimStartToCurrent;
+    private setTrimEndToCurrent;
+    private setAspectRatio;
+    private addTextOverlay;
+    private removeOverlay;
+    private startExport;
+    private handleAttachToPost;
+    private formatTime;
+    render(): import('lit-html').TemplateResult<1>;
+}
