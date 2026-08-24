@@ -1,4 +1,4 @@
-import { a as e, S as n, c as a, b as t } from "../SenkronPostGeneratorModal-R-hdj_w6.mjs";
+import { S as e, a as n, b as a, c as t } from "../SenkronPostGeneratorModal-CN_QI7GZ.mjs";
 export {
   e as SenkronPostGenerator,
   n as SenkronPostGeneratorModal,
