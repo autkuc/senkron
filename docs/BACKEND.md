@@ -1,17 +1,51 @@
-# Backend Specification (`backend/`)
+# Backend Specification
 
-## Overview
+## Endpoints
 
-The `backend/` directory handles incoming traffic, rate limiting, and request processing via REST and GraphQL.
+### 1. Video Routing & Decision Engine
+`POST /api/video/route-decision`
 
-## Features
+#### Request Payload
+```json
+{
+  "fileSizeBytes": 15728640,
+  "durationSeconds": 24.5,
+  "clientCapabilities": {
+    "hasWasm": true,
+    "hardwareConcurrency": 8,
+    "deviceMemoryGB": 16
+  }
+}
+```
 
-1. **Routers & Request Handling**:
-   - Modular routing layer handling API requests from web components and third-party integrations.
+#### Response Payload
+```json
+{
+  "target": "client_wasm",
+  "reason": "File size (15.00 MB) within client limits (<50MB)",
+  "maxDimensions": {
+    "width": 1080,
+    "height": 1920
+  },
+  "recommendedCodec": "h264"
+}
+```
 
-2. **Rate Limiting**:
-   - Middleware to prevent API abuse, token exhaustion on AI endpoints, and denial of service.
+---
 
-3. **REST & GraphQL Support**:
-   - REST endpoints for binary asset uploads and lightweight web component interactions.
-   - GraphQL server for query-based post generation, structured metadata, and flexible data fetching.
+### 2. Tiered Rate Limiter & Quotas
+`GET /api/quota/status`
+
+Headers returned with every request:
+- `X-RateLimit-Limit`: Maximum requests per sliding minute window.
+- `X-RateLimit-Remaining`: Remaining request allowance.
+- `X-RateLimit-Reset`: Unix epoch reset timestamp.
+- `X-Quota-Remaining`: Daily compute / AI edit quota.
+
+#### Tier Rules
+| Tier | Rate Limit (RPM) | Daily Quota | Server Transcoding |
+| :--- | :--- | :--- | :--- |
+| **guest** | 0 | 0 | Blocked |
+| **free** | 10 | 3 | Blocked (Client WASM only) |
+| **standard** | 30 | 15 | Allowed |
+| **pro** | 120 | Unlimited | Allowed |

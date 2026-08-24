@@ -1,56 +1,45 @@
-# Web Components Specification (`components/`)
+# Web Components API Reference
 
-## Overview
+## 1. Video Editor (`<senkron-video-editor>`)
 
-Senkron exports custom Web Components (Custom Elements) that can be imported and rendered inside Next.js / React applications or any standard web environment.
+### Properties
+| Property | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `src` | `string` | `""` | Video URL or object URL. |
+| `aspect-ratio` | `"16:9" \| "9:16" \| "1:1" \| "4:5"` | `"16:9"` | Aspect ratio for preview and export. |
+| `theme` | `"dark" \| "light"` | `"dark"` | Visual theme. |
+
+### Events
+| Event | Detail | Description |
+| :--- | :--- | :--- |
+| `senkron:ready` | `{ duration: number }` | Video metadata loaded. |
+| `senkron:timeupdate` | `{ currentTime: number }` | Playhead position changed. |
+| `senkron:export-progress` | `{ percentage: number, stage: string }` | Transcoding progress. |
+| `senkron:export-complete` | `{ outputBlobUrl: string, duration: number }` | Render completed. |
+| `senkron:error` | `{ message: string }` | Execution failure. |
 
 ---
 
-## 1. WASM FFmpeg Video Editor (`<senkron-video-editor>`)
+## 2. Post Generator (`<senkron-post-generator>`)
 
-### Tag Name
-`<senkron-video-editor>` or React wrapper `<SenkronVideoEditor />`
-
-### Attributes & Properties
-
-| Name | Type | Default | Description |
+### Properties
+| Property | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `src` | `string` | `""` | Source URL or Blob URL of the video file to edit. |
-| `aspect-ratio` | `"16:9" \| "9:16" \| "1:1" \| "4:5"` | `"16:9"` | Aspect ratio of the canvas preview & export. |
-| `theme` | `"dark" \| "light"` | `"dark"` | UI theme. |
-| `autoplay` | `boolean` | `false` | Autoplay preview on load. |
+| `topic` | `string` | `""` | Initial prompt text. |
+| `default-tone` | `"viral" \| "professional" \| "educational" \| "casual" \| "witty"` | `"viral"` | Initial tone selection. |
+| `api-url` | `string` | `"/api/ai/generate"` | Inference backend endpoint. |
 
 ### Events
-
-| Event Name | Detail Payload | Description |
+| Event | Detail | Description |
 | :--- | :--- | :--- |
-| `senkron:ready` | `{ duration: number }` | Emitted when metadata and video stream are initialized. |
-| `senkron:timeupdate` | `{ currentTime: number }` | Emitted during video playback / scrubbing. |
-| `senkron:export-progress` | `{ percentage: number, stage: string, message?: string }` | Emitted during client WASM rendering. |
-| `senkron:export-complete` | `{ outputBlobUrl: string, duration: number }` | Emitted upon successful MP4 / WebM generation. |
-| `senkron:error` | `{ message: string, error?: unknown }` | Emitted on playback or rendering failures. |
+| `senkron:post-generated` | `{ content: string, hashtags: string[] }` | Candidates received from backend. |
+| `senkron:post-applied` | `{ content: string, hashtags: string[] }` | User selected draft to apply. |
+| `senkron:post-error` | `{ message: string }` | Generation failed. |
 
 ---
 
-## 2. Social Media Post Generator (`<senkron-post-generator>`)
+## 3. Modal Wrappers
 
-### Tag Name
-`<senkron-post-generator>` or React wrapper `<SenkronPostGenerator />`
-
-### Attributes & Properties
-
-| Name | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `topic` | `string` | `""` | Content prompt or source keynotes for post generation. |
-| `default-platform` | `"twitter" \| "linkedin" \| "instagram" \| "threads"` | `"twitter"` | Initial active social platform tab. |
-| `default-tone` | `"viral" \| "professional" \| "educational" \| "casual" \| "witty"` | `"viral"` | Writing tone / style. |
-| `api-url` | `string` | `""` | Backend REST endpoint for AI inference (optional). |
-| `graphql-url` | `string` | `""` | Backend GraphQL endpoint (optional). |
-
-### Events
-
-| Event Name | Detail Payload | Description |
-| :--- | :--- | :--- |
-| `senkron:post-generated` | `{ platform: SocialPlatform, draft: PostDraft }` | Emitted when a new AI draft is generated. |
-| `senkron:post-copied` | `{ platform: SocialPlatform, text: string }` | Emitted when a user copies the draft to clipboard. |
-| `senkron:post-error` | `{ message: string }` | Emitted on generation failure. |
+- `<senkron-video-editor-modal>`: Drop-in modal container with backdrop, header, and attach actions.
+- `<senkron-post-generator-modal>`: Drop-in modal container for NSosyal post drafting.
+- React bindings available under `@senkron/components/react`.

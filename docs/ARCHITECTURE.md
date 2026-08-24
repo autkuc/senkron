@@ -1,56 +1,56 @@
-# Senkron System Architecture
+# System Architecture
 
-## High-Level Diagram
+## Component Overview
 
 ```
 +-------------------------------------------------------------------+
-|                        Next.js Demo Web App                       |
-|                             (`demo/`)                             |
+|                        Client Application                         |
+|                   (React / Next.js / Lit Web)                     |
 |                                                                   |
 |   +-----------------------------------------------------------+   |
-|   |                  Web Components Package                   |   |
-|   |                       (`components/`)                     |   |
+|   |                  @senkron/components                      |   |
 |   |                                                           |   |
 |   |  +---------------------------+ +-----------------------+  |   |
-|   |  | Video Editor Web Comp     | | Post Generator Comp   |  |   |
-|   |  | (CapCut-like, WASM FFmpeg)| | (LLM-driven UI)       |  |   |
+|   |  | <senkron-video-editor>    | | <senkron-post-gen>    |  |   |
+|   |  | (Client WASM FFmpeg)      | | (NSosyal Post Modal)  |  |   |
 |   |  +---------------------------+ +-----------------------+  |   |
 |   +-----------------------------------------------------------+   |
 +---------------------------------|---------------------------------+
                                   | REST / GraphQL
                                   v
 +-------------------------------------------------------------------+
-|                           Backend Engine                          |
-|                             (`backend/`)                          |
+|                         @senkron/backend                          |
 |                                                                   |
 |  +-----------------------+ +--------------------+ +------------+  |
-|  | Routers & Controllers | | Rate Limiting      | | REST & GQL |  |
+|  | Decision Router       | | Tiered Rate Limit  | | Transcoder |  |
 |  +-----------------------+ +--------------------+ +------------+  |
 +---------------------------------|---------------------------------+
                                   | Internal Service Bus
                                   v
 +-------------------------------------------------------------------+
-|                             AI Engine                             |
-|                               (`ai/`)                             |
+|                           @senkron/ai                             |
 |                                                                   |
 |  +---------------------+ +------------------+ +----------------+  |
-|  | LLM Provider Adapt. | | Prompt Templates | | Post Pipeline  |  |
+|  | Smart Concurrency Q | | Moderation Guard | | Post Pipeline  |  |
 |  +---------------------+ +------------------+ +----------------+  |
 +-------------------------------------------------------------------+
 ```
 
-## System Modules
+## Subsystems
 
-1. **Frontend Web Components (`components/`)**:
-   - Packaged as standalone Web Components for easy drop-in integration into any Next.js / React application.
-   - Client-side video rendering powered by `@ffmpeg/ffmpeg` WebAssembly.
-   - Interactive UI components for generating social media posts.
+### 1. Client Layer (`@senkron/components`)
+- Independent Custom Elements built with Lit.
+- In-browser video decoding, frame trimming, aspect ratio cropping, and H.264 export using `@ffmpeg/ffmpeg` WebAssembly.
+- Emits standard DOM events (`senkron:ready`, `senkron:export-progress`, `senkron:export-complete`, `senkron:error`).
 
-2. **Demo Application (`demo/`)**:
-   - Isolated Next.js environment for showcasing component usage, reactivity, and performance testing.
+### 2. Backend Orchestrator (`@senkron/backend`)
+- Evaluates file size and hardware heuristics to assign video workloads:
+  - `< 50MB`: Assigned to `client_wasm` execution.
+  - `> 50MB`: Dispatched to server native FFmpeg transcode queue (`server_native`).
+- Enforces sliding-window rate limiting per IP / user token with tiered quotas.
+- Rejects unauthenticated guest traffic at the middleware boundary.
 
-3. **Backend Service (`backend/`)**:
-   - Implements API routes, rate limiting, request validation, and dual REST + GraphQL API handlers.
-
-4. **AI Core (`ai/`)**:
-   - Contains model integrations, prompt templates, context orchestrators, and social media post generators.
+### 3. Inference & Guardrail Engine (`@senkron/ai`)
+- Double-pass input filtering (regex injection signatures + token classification for Turkish/English content).
+- Multi-candidate post generator with entropy and virality ranking.
+- Concurrency-aware router dispatching to local Ollama endpoints or cloud Modal GPU instances with automatic fallback.
