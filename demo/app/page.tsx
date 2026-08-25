@@ -26,7 +26,7 @@ const INITIAL_POSTS: FeedPost[] = [
     timeAgo: '15 dk',
     content: 'Yeni nesil istemci taraflı video kırpma ve yapay zeka asistanı Senkron modülü yayında.\n\nVideolarınızı sunucuya göndermeden doğrudan tarayıcınızda saniyeler içinde düzenleyip paylaşabilirsiniz.',
     hashtags: ['#NSosyal', '#Yazılım', '#VideoDüzenleme'],
-    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    videoUrl: '/videos/teknofest-sample.mp4',
     likesCount: 38,
     repostsCount: 12,
     repliesCount: 6,
@@ -64,6 +64,7 @@ const INITIAL_POSTS: FeedPost[] = [
 
 export default function NSosyalDemoPage() {
   const [posts, setPosts] = useState<FeedPost[]>(INITIAL_POSTS);
+  const [activeVideoSrc, setActiveVideoSrc] = useState<string>('/videos/teknofest-sample.mp4');
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
@@ -131,6 +132,13 @@ export default function NSosyalDemoPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  const handleUploadVideoFile = (file: File) => {
+    const objectUrl = URL.createObjectURL(file);
+    setActiveVideoSrc(objectUrl);
+    setIsVideoModalOpen(true);
+    showToast(`"${file.name}" yüklendi (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
+  };
+
   const handleVideoAttached = (detail: VideoAttachedDetail) => {
     setAttachedVideo(detail);
     setIsVideoModalOpen(false);
@@ -168,15 +176,16 @@ export default function NSosyalDemoPage() {
       likesCount: 0,
       repostsCount: 0,
       repliesCount: 0,
+      isLiked: false,
     };
 
     setPosts([newPost, ...posts]);
     setAttachedVideo(null);
     setPostText('');
-    showToast('Gönderi paylaşıldı');
+    showToast('Gönderiniz başarıyla paylaşıldı!');
 
     // Reward Badge: Topluluk Sesi
-    unlockBadge('community_voice');
+    unlockBadge('first_post');
 
     // Check for TEKNOFEST / Milli Teknoloji tag
     if (text.includes('#TEKNOFEST') || text.includes('#MilliTeknoloji') || text.includes('TEKNOFEST')) {
@@ -184,62 +193,63 @@ export default function NSosyalDemoPage() {
     }
   };
 
-  const handleToggleLike = (id: string) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              isLiked: !p.isLiked,
-              likesCount: p.isLiked ? p.likesCount - 1 : p.likesCount + 1,
-            }
-          : p
-      )
+  const handleToggleLike = (postId: string) => {
+    setPosts(
+      posts.map((p) => {
+        if (p.id === postId) {
+          const isLiked = !p.isLiked;
+          if (isLiked) unlockBadge('social_butterfly');
+          return {
+            ...p,
+            isLiked,
+            likesCount: isLiked ? p.likesCount + 1 : p.likesCount - 1,
+          };
+        }
+        return p;
+      })
     );
-    // Reward Badge: Etkileşim Öncüsü
-    unlockBadge('interaction_lead');
   };
 
-  const handleToggleRepost = (id: string) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              isReposted: !p.isReposted,
-              repostsCount: p.isReposted ? p.repostsCount - 1 : p.repostsCount + 1,
-            }
-          : p
-      )
+  const handleToggleRepost = (postId: string) => {
+    setPosts(
+      posts.map((p) => {
+        if (p.id === postId) {
+          return {
+            ...p,
+            repostsCount: p.repostsCount + 1,
+          };
+        }
+        return p;
+      })
     );
-    unlockBadge('interaction_lead');
+    showToast('Gönderi yeniden paylaşıldı 🔄');
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex justify-center text-slate-200">
-      {/* Toast Notification */}
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex justify-center">
+      {/* Toast Notification Banner */}
       {toastMessage && (
         <div
-          className={`fixed top-5 left-1/2 -translate-y-1/2 z-[999999] px-4 py-2.5 rounded-xl border text-xs font-semibold shadow-2xl flex items-center gap-3 animate-in fade-in-0 slide-in-from-top-4 duration-300 ${
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-semibold backdrop-blur-md border animate-in fade-in-0 slide-in-from-top-4 duration-200 ${
             toastMessage.isBadge
-              ? 'bg-[#151d30] border-amber-500/50 text-amber-300 shadow-amber-500/10'
-              : 'bg-[#141c2e] border-slate-700 text-slate-200'
+              ? 'bg-amber-500/20 border-amber-500/50 text-amber-200 shadow-amber-500/10'
+              : 'bg-sky-500/20 border-sky-500/40 text-sky-200 shadow-sky-500/10'
           }`}
         >
           <span>{toastMessage.text}</span>
-          {toastMessage.isBadge && (
-            <button
-              onClick={() => setIsBadgeModalOpen(true)}
-              className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] underline"
-            >
-              Rozetleri İncele
-            </button>
-          )}
+        </div>
+      )}
+
+      {/* Offline Alert Sticky Banner */}
+      {isOffline && (
+        <div className="fixed bottom-4 right-4 z-40 px-3.5 py-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center gap-2 backdrop-blur-md shadow-lg">
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+          <span>Çevrimdışı Mod (Offline)</span>
           <button
-            onClick={() => setToastMessage(null)}
-            className="text-slate-400 hover:text-white ml-1 text-xs"
+            onClick={() => setIsDinoModalOpen(true)}
+            className="ml-2 px-2 py-0.5 rounded bg-red-500/30 hover:bg-red-500/50 text-[11px] underline"
           >
-            ✕
+            Dino Oyna 🦖
           </button>
         </div>
       )}
@@ -286,8 +296,12 @@ export default function NSosyalDemoPage() {
 
           {/* Post Composer Area */}
           <PostComposer
-            onOpenVideoModal={() => setIsVideoModalOpen(true)}
+            onOpenVideoModal={() => {
+              setActiveVideoSrc('/videos/teknofest-sample.mp4');
+              setIsVideoModalOpen(true);
+            }}
             onOpenAiModal={() => setIsAiModalOpen(true)}
+            onUploadVideoFile={handleUploadVideoFile}
             attachedVideo={attachedVideo}
             onRemoveVideo={() => setAttachedVideo(null)}
             postText={postText}
@@ -318,7 +332,7 @@ export default function NSosyalDemoPage() {
       {/* WASM Video Editor Modal */}
       <SenkronVideoEditorModal
         isOpen={isVideoModalOpen}
-        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        src={activeVideoSrc}
         onClose={() => setIsVideoModalOpen(false)}
         onVideoAttached={(detail) => {
           handleVideoAttached(detail);

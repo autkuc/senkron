@@ -40,6 +40,69 @@ export const videoEditorStyles = css`
     color: #f1f5f9;
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .upload-btn:hover {
+    background: #334155;
+    color: #38bdf8;
+    border-color: #38bdf8;
+  }
+
+  .file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drop-overlay {
+    position: absolute;
+    inset: 12px;
+    border: 2px dashed #07d0e0;
+    background: rgba(7, 208, 224, 0.12);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .drop-overlay span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #07d0e0;
+  }
+
   .aspect-selector {
     display: flex;
     gap: 4px;

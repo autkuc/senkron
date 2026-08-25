@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import type { VideoAttachedDetail } from '@senkron/components';
 
 interface PostComposerProps {
   onOpenVideoModal: () => void;
   onOpenAiModal: () => void;
+  onUploadVideoFile?: (file: File) => void;
   attachedVideo: VideoAttachedDetail | null;
   onRemoveVideo: () => void;
   postText: string;
@@ -16,12 +17,15 @@ interface PostComposerProps {
 export const PostComposer: React.FC<PostComposerProps> = ({
   onOpenVideoModal,
   onOpenAiModal,
+  onUploadVideoFile,
   attachedVideo,
   onRemoveVideo,
   postText,
   onPostTextChange,
   onPublish,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleSubmit = () => {
     if (!postText.trim() && !attachedVideo) return;
     onPublish({
@@ -29,6 +33,17 @@ export const PostComposer: React.FC<PostComposerProps> = ({
       video: attachedVideo || undefined,
     });
     onPostTextChange('');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (onUploadVideoFile) {
+        onUploadVideoFile(file);
+      }
+      // Reset input value so same file can be re-selected if needed
+      e.target.value = '';
+    }
   };
 
   return (
@@ -81,26 +96,48 @@ export const PostComposer: React.FC<PostComposerProps> = ({
 
       {/* Action Toolbar */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {/* Video Studio Trigger */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Direct Video File Upload Button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-medium flex items-center gap-1.5 transition"
+            title="Bilgisayarınızdan video yükleyin ve WASM düzenleyicide açın"
+          >
+            <svg className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <span>Video Yükle</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* Video Studio Trigger with Default Sample */}
           <button
             type="button"
             onClick={onOpenVideoModal}
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition"
-            title="Video Düzenle"
+            className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition"
+            title="TEKNOFEST Örnek Videosuyla Video Stüdyosunu Aç"
           >
-            <svg className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
-            <span>Video Düzenle</span>
+            <span>Stüdyoyu Aç</span>
           </button>
 
           {/* AI Post Assistant Trigger */}
           <button
             type="button"
             onClick={onOpenAiModal}
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition"
+            className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition"
             title="Taslak Asistanı"
           >
             <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -108,51 +145,14 @@ export const PostComposer: React.FC<PostComposerProps> = ({
             </svg>
             <span>Taslak Önerisi</span>
           </button>
-
-          <div className="h-4 w-px bg-slate-800 mx-1"></div>
-
-          {/* Social Icons */}
-          <button
-            type="button"
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-300 transition"
-            title="Fotoğraf Ekle"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-300 transition"
-            title="Anket Yap"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-300 transition"
-            title="Emoji"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-              <line x1="9" y1="9" x2="9.01" y2="9" />
-              <line x1="15" y1="9" x2="15.01" y2="9" />
-            </svg>
-          </button>
         </div>
 
-        {/* Publish Action */}
+        {/* Submit Button */}
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={!postText.trim() && !attachedVideo}
-          className="px-4 py-1.5 rounded-lg font-semibold text-xs text-white bg-sky-600 hover:bg-sky-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold shadow-md shadow-sky-500/10 transition"
         >
           Paylaş
         </button>

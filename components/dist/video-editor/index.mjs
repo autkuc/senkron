@@ -1,12 +1,12 @@
 var Z = Object.defineProperty;
-var j = (s) => {
-  throw TypeError(s);
+var j = (a) => {
+  throw TypeError(a);
 };
-var J = (s, t, e) => t in s ? Z(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e;
-var h = (s, t, e) => J(s, typeof t != "symbol" ? t + "" : t, e), V = (s, t, e) => t.has(s) || j("Cannot " + e);
-var n = (s, t, e) => (V(s, t, "read from private field"), e ? e.call(s) : t.get(s)), T = (s, t, e) => t.has(s) ? j("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(s) : t.set(s, e), F = (s, t, e, i) => (V(s, t, "write to private field"), i ? i.call(s, e) : t.set(s, e), e);
-import { i as Q, a as G, b as E, n as k, r as x } from "../state-C6LA3nSk.mjs";
-const K = Q`
+var J = (a, e, t) => e in a ? Z(a, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : a[e] = t;
+var f = (a, e, t) => J(a, typeof e != "symbol" ? e + "" : e, t), V = (a, e, t) => e.has(a) || j("Cannot " + t);
+var o = (a, e, t) => (V(a, e, "read from private field"), t ? t.call(a) : e.get(a)), T = (a, e, t) => e.has(a) ? j("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(a) : e.set(a, t), C = (a, e, t, i) => (V(a, e, "write to private field"), i ? i.call(a, t) : e.set(a, t), t);
+import { i as Q, a as G, b as v, n as k, r as x } from "../state-C6LA3nSk.mjs";
+const Y = Q`
   :host {
     display: block;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -44,6 +44,69 @@ const K = Q`
     font-size: 14px;
     font-weight: 600;
     color: #f1f5f9;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .upload-btn:hover {
+    background: #334155;
+    color: #38bdf8;
+    border-color: #38bdf8;
+  }
+
+  .file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .drop-overlay {
+    position: absolute;
+    inset: 12px;
+    border: 2px dashed #07d0e0;
+    background: rgba(7, 208, 224, 0.12);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .drop-overlay span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #07d0e0;
   }
 
   .aspect-selector {
@@ -265,15 +328,15 @@ const K = Q`
   }
 `;
 var d;
-(function(s) {
-  s.LOAD = "LOAD", s.EXEC = "EXEC", s.FFPROBE = "FFPROBE", s.WRITE_FILE = "WRITE_FILE", s.READ_FILE = "READ_FILE", s.DELETE_FILE = "DELETE_FILE", s.RENAME = "RENAME", s.CREATE_DIR = "CREATE_DIR", s.LIST_DIR = "LIST_DIR", s.DELETE_DIR = "DELETE_DIR", s.ERROR = "ERROR", s.DOWNLOAD = "DOWNLOAD", s.PROGRESS = "PROGRESS", s.LOG = "LOG", s.MOUNT = "MOUNT", s.UNMOUNT = "UNMOUNT";
+(function(a) {
+  a.LOAD = "LOAD", a.EXEC = "EXEC", a.FFPROBE = "FFPROBE", a.WRITE_FILE = "WRITE_FILE", a.READ_FILE = "READ_FILE", a.DELETE_FILE = "DELETE_FILE", a.RENAME = "RENAME", a.CREATE_DIR = "CREATE_DIR", a.LIST_DIR = "LIST_DIR", a.DELETE_DIR = "DELETE_DIR", a.ERROR = "ERROR", a.DOWNLOAD = "DOWNLOAD", a.PROGRESS = "PROGRESS", a.LOG = "LOG", a.MOUNT = "MOUNT", a.UNMOUNT = "UNMOUNT";
 })(d || (d = {}));
-const tt = /* @__PURE__ */ (() => {
-  let s = 0;
-  return () => s++;
-})(), et = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"), it = new Error("called FFmpeg.terminate()");
-var b, S, w, $, A, M, m;
-class rt {
+const ee = /* @__PURE__ */ (() => {
+  let a = 0;
+  return () => a++;
+})(), te = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"), ie = new Error("called FFmpeg.terminate()");
+var b, S, E, $, L, M, u;
+class se {
   constructor() {
     T(this, b, null);
     /**
@@ -281,18 +344,18 @@ class rt {
      * be called when we receive message from web worker.
      */
     T(this, S, {});
-    T(this, w, {});
+    T(this, E, {});
     T(this, $, []);
-    T(this, A, []);
-    h(this, "loaded", !1);
+    T(this, L, []);
+    f(this, "loaded", !1);
     /**
      * register worker message event handlers.
      */
     T(this, M, () => {
-      n(this, b) && (n(this, b).onmessage = ({ data: { id: t, type: e, data: i } }) => {
-        switch (e) {
+      o(this, b) && (o(this, b).onmessage = ({ data: { id: e, type: t, data: i } }) => {
+        switch (t) {
           case d.LOAD:
-            this.loaded = !0, n(this, S)[t](i);
+            this.loaded = !0, o(this, S)[e](i);
             break;
           case d.MOUNT:
           case d.UNMOUNT:
@@ -305,30 +368,30 @@ class rt {
           case d.CREATE_DIR:
           case d.LIST_DIR:
           case d.DELETE_DIR:
-            n(this, S)[t](i);
+            o(this, S)[e](i);
             break;
           case d.LOG:
-            n(this, $).forEach((r) => r(i));
+            o(this, $).forEach((s) => s(i));
             break;
           case d.PROGRESS:
-            n(this, A).forEach((r) => r(i));
+            o(this, L).forEach((s) => s(i));
             break;
           case d.ERROR:
-            n(this, w)[t](i);
+            o(this, E)[e](i);
             break;
         }
-        delete n(this, S)[t], delete n(this, w)[t];
+        delete o(this, S)[e], delete o(this, E)[e];
       });
     });
     /**
      * Generic function to send messages to web worker.
      */
-    T(this, m, ({ type: t, data: e }, i = [], r) => n(this, b) ? new Promise((a, o) => {
-      const l = tt();
-      n(this, b) && n(this, b).postMessage({ id: l, type: t, data: e }, i), n(this, S)[l] = a, n(this, w)[l] = o, r == null || r.addEventListener("abort", () => {
-        o(new DOMException(`Message # ${l} was aborted`, "AbortError"));
+    T(this, u, ({ type: e, data: t }, i = [], s) => o(this, b) ? new Promise((r, n) => {
+      const l = ee();
+      o(this, b) && o(this, b).postMessage({ id: l, type: e, data: t }, i), o(this, S)[l] = r, o(this, E)[l] = n, s == null || s.addEventListener("abort", () => {
+        n(new DOMException(`Message # ${l} was aborted`, "AbortError"));
       }, { once: !0 });
-    }) : Promise.reject(et));
+    }) : Promise.reject(te));
     /**
      * Loads ffmpeg-core inside web worker. It is required to call this method first
      * as it initializes WebAssembly and other essential variables.
@@ -336,7 +399,7 @@ class rt {
      * @category FFmpeg
      * @returns `true` if ffmpeg core is loaded for the first time.
      */
-    h(this, "load", ({ classWorkerURL: t, ...e } = {}, { signal: i } = {}) => (n(this, b) || (F(this, b, t ? new Worker(new URL(t, import.meta.url), {
+    f(this, "load", ({ classWorkerURL: e, ...t } = {}, { signal: i } = {}) => (o(this, b) || (C(this, b, e ? new Worker(new URL(e, import.meta.url), {
       type: "module"
     }) : (
       // We need to duplicated the code here to enable webpack
@@ -348,9 +411,9 @@ class rt {
       ), {
         type: "module"
       })
-    )), n(this, M).call(this)), n(this, m).call(this, {
+    )), o(this, M).call(this)), o(this, u).call(this, {
       type: d.LOAD,
-      data: e
+      data: t
     }, void 0, i)));
     /**
      * Execute ffmpeg command.
@@ -372,9 +435,9 @@ class rt {
      * @returns `0` if no error, `!= 0` if timeout (1) or error.
      * @category FFmpeg
      */
-    h(this, "exec", (t, e = -1, { signal: i } = {}) => n(this, m).call(this, {
+    f(this, "exec", (e, t = -1, { signal: i } = {}) => o(this, u).call(this, {
       type: d.EXEC,
-      data: { args: t, timeout: e }
+      data: { args: e, timeout: t }
     }, void 0, i));
     /**
      * Execute ffprobe command.
@@ -392,9 +455,9 @@ class rt {
      * @returns `0` if no error, `!= 0` if timeout (1) or error.
      * @category FFmpeg
      */
-    h(this, "ffprobe", (t, e = -1, { signal: i } = {}) => n(this, m).call(this, {
+    f(this, "ffprobe", (e, t = -1, { signal: i } = {}) => o(this, u).call(this, {
       type: d.FFPROBE,
-      data: { args: t, timeout: e }
+      data: { args: e, timeout: t }
     }, void 0, i));
     /**
      * Terminate all ongoing API calls and terminate web worker.
@@ -402,11 +465,11 @@ class rt {
      *
      * @category FFmpeg
      */
-    h(this, "terminate", () => {
-      const t = Object.keys(n(this, w));
-      for (const e of t)
-        n(this, w)[e](it), delete n(this, w)[e], delete n(this, S)[e];
-      n(this, b) && (n(this, b).terminate(), F(this, b, null), this.loaded = !1);
+    f(this, "terminate", () => {
+      const e = Object.keys(o(this, E));
+      for (const t of e)
+        o(this, E)[t](ie), delete o(this, E)[t], delete o(this, S)[t];
+      o(this, b) && (o(this, b).terminate(), C(this, b, null), this.loaded = !1);
     });
     /**
      * Write data to ffmpeg.wasm.
@@ -421,26 +484,26 @@ class rt {
      *
      * @category File System
      */
-    h(this, "writeFile", (t, e, { signal: i } = {}) => {
-      const r = [];
-      return e instanceof Uint8Array && r.push(e.buffer), n(this, m).call(this, {
+    f(this, "writeFile", (e, t, { signal: i } = {}) => {
+      const s = [];
+      return t instanceof Uint8Array && s.push(t.buffer), o(this, u).call(this, {
         type: d.WRITE_FILE,
-        data: { path: t, data: e }
-      }, r, i);
+        data: { path: e, data: t }
+      }, s, i);
     });
-    h(this, "mount", (t, e, i) => {
-      const r = [];
-      return n(this, m).call(this, {
+    f(this, "mount", (e, t, i) => {
+      const s = [];
+      return o(this, u).call(this, {
         type: d.MOUNT,
-        data: { fsType: t, options: e, mountPoint: i }
-      }, r);
+        data: { fsType: e, options: t, mountPoint: i }
+      }, s);
     });
-    h(this, "unmount", (t) => {
-      const e = [];
-      return n(this, m).call(this, {
+    f(this, "unmount", (e) => {
+      const t = [];
+      return o(this, u).call(this, {
         type: d.UNMOUNT,
-        data: { mountPoint: t }
-      }, e);
+        data: { mountPoint: e }
+      }, t);
     });
     /**
      * Read data from ffmpeg.wasm.
@@ -454,122 +517,122 @@ class rt {
      *
      * @category File System
      */
-    h(this, "readFile", (t, e = "binary", { signal: i } = {}) => n(this, m).call(this, {
+    f(this, "readFile", (e, t = "binary", { signal: i } = {}) => o(this, u).call(this, {
       type: d.READ_FILE,
-      data: { path: t, encoding: e }
+      data: { path: e, encoding: t }
     }, void 0, i));
     /**
      * Delete a file.
      *
      * @category File System
      */
-    h(this, "deleteFile", (t, { signal: e } = {}) => n(this, m).call(this, {
+    f(this, "deleteFile", (e, { signal: t } = {}) => o(this, u).call(this, {
       type: d.DELETE_FILE,
-      data: { path: t }
-    }, void 0, e));
+      data: { path: e }
+    }, void 0, t));
     /**
      * Rename a file or directory.
      *
      * @category File System
      */
-    h(this, "rename", (t, e, { signal: i } = {}) => n(this, m).call(this, {
+    f(this, "rename", (e, t, { signal: i } = {}) => o(this, u).call(this, {
       type: d.RENAME,
-      data: { oldPath: t, newPath: e }
+      data: { oldPath: e, newPath: t }
     }, void 0, i));
     /**
      * Create a directory.
      *
      * @category File System
      */
-    h(this, "createDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+    f(this, "createDir", (e, { signal: t } = {}) => o(this, u).call(this, {
       type: d.CREATE_DIR,
-      data: { path: t }
-    }, void 0, e));
+      data: { path: e }
+    }, void 0, t));
     /**
      * List directory contents.
      *
      * @category File System
      */
-    h(this, "listDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+    f(this, "listDir", (e, { signal: t } = {}) => o(this, u).call(this, {
       type: d.LIST_DIR,
-      data: { path: t }
-    }, void 0, e));
+      data: { path: e }
+    }, void 0, t));
     /**
      * Delete an empty directory.
      *
      * @category File System
      */
-    h(this, "deleteDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+    f(this, "deleteDir", (e, { signal: t } = {}) => o(this, u).call(this, {
       type: d.DELETE_DIR,
-      data: { path: t }
-    }, void 0, e));
+      data: { path: e }
+    }, void 0, t));
   }
-  on(t, e) {
-    t === "log" ? n(this, $).push(e) : t === "progress" && n(this, A).push(e);
+  on(e, t) {
+    e === "log" ? o(this, $).push(t) : e === "progress" && o(this, L).push(t);
   }
-  off(t, e) {
-    t === "log" ? F(this, $, n(this, $).filter((i) => i !== e)) : t === "progress" && F(this, A, n(this, A).filter((i) => i !== e));
+  off(e, t) {
+    e === "log" ? C(this, $, o(this, $).filter((i) => i !== t)) : e === "progress" && C(this, L, o(this, L).filter((i) => i !== t));
   }
 }
-b = new WeakMap(), S = new WeakMap(), w = new WeakMap(), $ = new WeakMap(), A = new WeakMap(), M = new WeakMap(), m = new WeakMap();
-var X;
-(function(s) {
-  s.MEMFS = "MEMFS", s.NODEFS = "NODEFS", s.NODERAWFS = "NODERAWFS", s.IDBFS = "IDBFS", s.WORKERFS = "WORKERFS", s.PROXYFS = "PROXYFS";
-})(X || (X = {}));
-const st = new Error("failed to get response body reader"), at = new Error("failed to complete download"), ot = "Content-Length", nt = (s) => new Promise((t, e) => {
+b = new WeakMap(), S = new WeakMap(), E = new WeakMap(), $ = new WeakMap(), L = new WeakMap(), M = new WeakMap(), u = new WeakMap();
+var H;
+(function(a) {
+  a.MEMFS = "MEMFS", a.NODEFS = "NODEFS", a.NODERAWFS = "NODERAWFS", a.IDBFS = "IDBFS", a.WORKERFS = "WORKERFS", a.PROXYFS = "PROXYFS";
+})(H || (H = {}));
+const ae = new Error("failed to get response body reader"), re = new Error("failed to complete download"), oe = "Content-Length", ne = (a) => new Promise((e, t) => {
   const i = new FileReader();
   i.onload = () => {
-    const { result: r } = i;
-    r instanceof ArrayBuffer ? t(new Uint8Array(r)) : t(new Uint8Array());
-  }, i.onerror = (r) => {
-    var a, o;
-    e(Error(`File could not be read! Code=${((o = (a = r == null ? void 0 : r.target) == null ? void 0 : a.error) == null ? void 0 : o.code) || -1}`));
-  }, i.readAsArrayBuffer(s);
-}), dt = async (s) => {
-  let t;
-  if (typeof s == "string")
-    /data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(s) ? t = atob(s.split(",")[1]).split("").map((e) => e.charCodeAt(0)) : t = await (await fetch(s)).arrayBuffer();
-  else if (s instanceof URL)
-    t = await (await fetch(s)).arrayBuffer();
-  else if (s instanceof File || s instanceof Blob)
-    t = await nt(s);
+    const { result: s } = i;
+    s instanceof ArrayBuffer ? e(new Uint8Array(s)) : e(new Uint8Array());
+  }, i.onerror = (s) => {
+    var r, n;
+    t(Error(`File could not be read! Code=${((n = (r = s == null ? void 0 : s.target) == null ? void 0 : r.error) == null ? void 0 : n.code) || -1}`));
+  }, i.readAsArrayBuffer(a);
+}), de = async (a) => {
+  let e;
+  if (typeof a == "string")
+    /data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(a) ? e = atob(a.split(",")[1]).split("").map((t) => t.charCodeAt(0)) : e = await (await fetch(a)).arrayBuffer();
+  else if (a instanceof URL)
+    e = await (await fetch(a)).arrayBuffer();
+  else if (a instanceof File || a instanceof Blob)
+    e = await ne(a);
   else
     return new Uint8Array();
-  return new Uint8Array(t);
-}, lt = async (s, t) => {
-  var r;
-  const e = await fetch(s);
+  return new Uint8Array(e);
+}, le = async (a, e) => {
+  var s;
+  const t = await fetch(a);
   let i;
   try {
-    const a = parseInt(e.headers.get(ot) || "-1"), o = (r = e.body) == null ? void 0 : r.getReader();
-    if (!o)
-      throw st;
+    const r = parseInt(t.headers.get(oe) || "-1"), n = (s = t.body) == null ? void 0 : s.getReader();
+    if (!n)
+      throw ae;
     const l = [];
-    let f = 0;
+    let m = 0;
     for (; ; ) {
-      const { done: v, value: R } = await o.read(), p = R ? R.length : 0;
-      if (v) {
-        if (a != -1 && a !== f)
-          throw at;
-        t && t({ url: s, total: a, received: f, delta: p, done: v });
+      const { done: w, value: R } = await n.read(), h = R ? R.length : 0;
+      if (w) {
+        if (r != -1 && r !== m)
+          throw re;
+        e && e({ url: a, total: r, received: m, delta: h, done: w });
         break;
       }
-      l.push(R), f += p, t && t({ url: s, total: a, received: f, delta: p, done: v });
+      l.push(R), m += h, e && e({ url: a, total: r, received: m, delta: h, done: w });
     }
-    const y = new Uint8Array(f);
+    const y = new Uint8Array(m);
     let O = 0;
-    for (const v of l)
-      y.set(v, O), O += v.length;
+    for (const w of l)
+      y.set(w, O), O += w.length;
     i = y.buffer;
-  } catch (a) {
-    console.log("failed to send download progress event: ", a), i = await e.arrayBuffer();
+  } catch (r) {
+    console.log("failed to send download progress event: ", r), i = await t.arrayBuffer();
   }
   return i;
-}, H = async (s, t, e = !1, i) => {
-  const r = e ? await lt(s, i) : await (await fetch(s)).arrayBuffer(), a = new Blob([r], { type: t });
-  return URL.createObjectURL(a);
+}, X = async (a, e, t = !1, i) => {
+  const s = t ? await le(a, i) : await (await fetch(a)).arrayBuffer(), r = new Blob([s], { type: e });
+  return URL.createObjectURL(r);
 };
-class ct {
+class ce {
   constructor() {
     this.ffmpeg = null, this.isLoaded = !1, this.isProcessing = !1, this.loadPromise = null, this.defaultBaseUrls = [
       "/ffmpeg",
@@ -579,30 +642,30 @@ class ct {
   /**
    * Initializes the WebAssembly FFmpeg instance with fallback support.
    */
-  async initialize(t) {
+  async initialize(e) {
     return this.isLoaded && this.ffmpeg ? !0 : this.loadPromise ? this.loadPromise : (this.loadPromise = (async () => {
       if (typeof window > "u" || typeof Worker > "u")
         return !1;
       try {
-        const e = new rt();
-        e.on("log", ({ message: a }) => {
-          console.debug("[Senkron FFmpeg WASM]", a);
+        const t = new se();
+        t.on("log", ({ message: r }) => {
+          console.debug("[Senkron FFmpeg WASM]", r);
         });
-        const i = t ? [t, ...this.defaultBaseUrls] : this.defaultBaseUrls;
-        let r = !1;
-        for (const a of i)
+        const i = e ? [e, ...this.defaultBaseUrls] : this.defaultBaseUrls;
+        let s = !1;
+        for (const r of i)
           try {
-            const o = await H(`${a}/ffmpeg-core.js`, "text/javascript"), l = await H(`${a}/ffmpeg-core.wasm`, "application/wasm");
-            await e.load({
-              coreURL: o,
+            const n = await X(`${r}/ffmpeg-core.js`, "text/javascript"), l = await X(`${r}/ffmpeg-core.wasm`, "application/wasm");
+            await t.load({
+              coreURL: n,
               wasmURL: l
-            }), r = !0;
+            }), s = !0;
             break;
-          } catch (o) {
-            console.warn(`[Senkron FFmpeg WASM] Could not load core from ${a}:`, o);
+          } catch (n) {
+            console.warn(`[Senkron FFmpeg WASM] Could not load core from ${r}:`, n);
           }
-        if (r)
-          return this.ffmpeg = e, this.isLoaded = !0, !0;
+        if (s)
+          return this.ffmpeg = t, this.isLoaded = !0, !0;
       } catch {
         return !1;
       }
@@ -612,34 +675,34 @@ class ct {
   /**
    * Exports the video clip using real WebAssembly FFmpeg, with MediaRecorder fallback.
    */
-  async exportVideo(t, e, i, r, a = [], o, l = "16:9") {
+  async exportVideo(e, t, i, s, r = [], n, l = "16:9") {
     if (this.isProcessing)
       throw new Error("Bir dışa aktarma işlemi zaten yürütülüyor");
-    this.isProcessing = !0, o({ percentage: 5, stage: "extracting", message: "WASM FFmpeg motoru hazırlanıyor..." });
+    this.isProcessing = !0, n({ percentage: 5, stage: "extracting", message: "WASM FFmpeg motoru hazırlanıyor..." });
     try {
       if (await this.initialize() && this.ffmpeg && this.isLoaded)
         return await this.exportWithWasmFFmpeg(
-          t,
+          e,
           i,
+          s,
           r,
-          a,
           l,
-          o
+          n
         );
       if (typeof window < "u" && typeof MediaRecorder < "u") {
-        const y = e.captureStream ? e.captureStream(30) : null;
+        const y = t.captureStream ? t.captureStream(30) : null;
         if (y)
           return await this.recordCanvasSegment(
-            t,
             e,
+            t,
             i,
+            s,
             r,
-            a,
             y,
-            o
+            n
           );
       }
-      return await this.simulateExport(i, r, o);
+      return await this.simulateExport(i, s, n);
     } finally {
       this.isProcessing = !1;
     }
@@ -647,52 +710,52 @@ class ct {
   /**
    * Real in-browser WebAssembly FFmpeg video processing pipeline.
    */
-  async exportWithWasmFFmpeg(t, e, i, r, a, o) {
+  async exportWithWasmFFmpeg(e, t, i, s, r, n) {
     if (!this.ffmpeg)
       throw new Error("FFmpeg WASM instance is not ready");
-    const l = t.src || t.currentSrc;
+    const l = e.src || e.currentSrc;
     if (!l)
       throw new Error("Video kaynağı yüklenemedi");
-    o({
+    n({
       percentage: 15,
       stage: "extracting",
       message: "Video verisi WASM sanal belleğine yazılıyor..."
     });
-    const f = `input_${Date.now()}.mp4`, y = `output_${Date.now()}.mp4`;
+    const m = `input_${Date.now()}.mp4`, y = `output_${Date.now()}.mp4`;
     try {
-      const O = await dt(l);
-      await this.ffmpeg.writeFile(f, O);
-      const v = Math.max(0.1, i - e), R = ({ progress: P, time: W }) => {
-        let I = 0;
+      const O = await de(l);
+      await this.ffmpeg.writeFile(m, O);
+      const w = Math.max(0.1, i - t), R = ({ progress: P, time: z }) => {
+        let B = 0;
         if (typeof P == "number" && P > 0)
-          I = Math.min(95, Math.round(P * 100));
-        else if (W && v > 0) {
-          const q = W / 1e6;
-          I = Math.min(95, Math.round(q / v * 100));
+          B = Math.min(95, Math.round(P * 100));
+        else if (z && w > 0) {
+          const K = z / 1e6;
+          B = Math.min(95, Math.round(K / w * 100));
         }
-        const z = Math.max(25, I);
-        o({
-          percentage: z,
+        const W = Math.max(25, B);
+        n({
+          percentage: W,
           stage: "encoding",
-          message: `H.264 MP4 encode ediliyor (%${z})...`
+          message: `H.264 MP4 encode ediliyor (%${W})...`
         });
       };
       this.ffmpeg.on("progress", R);
-      const p = [];
-      a === "1:1" ? p.push("crop=min(iw\\,ih):min(iw\\,ih)") : a === "9:16" ? p.push("crop=min(iw\\,ih*9/16):ih") : a === "4:5" ? p.push("crop=min(iw\\,ih*4/5):ih") : a === "16:9" && p.push("crop=iw:min(ih\\,iw*9/16)"), o({
+      const h = [];
+      r === "1:1" ? h.push("crop=min(iw\\,ih):min(iw\\,ih)") : r === "9:16" ? h.push("crop=min(iw\\,ih*9/16):ih") : r === "4:5" ? h.push("crop=min(iw\\,ih*4/5):ih") : r === "16:9" && h.push("crop=iw:min(ih\\,iw*9/16)"), n({
         percentage: 25,
         stage: "processing",
         message: "FFmpeg dönüştürme filtreleri uygulanıyor..."
       });
       const U = [
         "-ss",
-        e.toFixed(3),
+        t.toFixed(3),
         "-to",
         i.toFixed(3),
         "-i",
-        f
+        m
       ];
-      p.length > 0 && U.push("-vf", p.join(",")), U.push(
+      h.length > 0 && U.push("-vf", h.join(",")), U.push(
         "-c:v",
         "libx264",
         "-preset",
@@ -708,13 +771,13 @@ class ct {
         "-movflags",
         "+faststart",
         y
-      ), await this.ffmpeg.exec(U), o({
+      ), await this.ffmpeg.exec(U), n({
         percentage: 95,
         stage: "completed",
         message: "Çıktı MP4 dosyası derleniyor..."
       });
-      const g = await this.ffmpeg.readFile(y), L = g, Y = new Blob([L], { type: "video/mp4" }), N = URL.createObjectURL(Y);
-      return o({
+      const g = await this.ffmpeg.readFile(y), D = g, q = new Blob([D], { type: "video/mp4" }), N = URL.createObjectURL(q);
+      return n({
         percentage: 100,
         stage: "completed",
         message: "WASM video dışa aktarımı başarıyla tamamlandı!",
@@ -722,7 +785,7 @@ class ct {
       }), N;
     } finally {
       try {
-        await this.ffmpeg.deleteFile(f);
+        await this.ffmpeg.deleteFile(m);
       } catch {
       }
       try {
@@ -734,115 +797,142 @@ class ct {
   /**
    * Browser MediaRecorder Canvas Capture Fallback
    */
-  async recordCanvasSegment(t, e, i, r, a, o, l) {
-    return new Promise((f, y) => {
-      const O = [], v = Math.max(0.1, r - i), R = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", p = new MediaRecorder(o, { mimeType: R });
-      p.ondataavailable = (g) => {
+  async recordCanvasSegment(e, t, i, s, r, n, l) {
+    return new Promise((m, y) => {
+      const O = [], w = Math.max(0.1, s - i), R = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", h = new MediaRecorder(n, { mimeType: R });
+      h.ondataavailable = (g) => {
         g.data && g.data.size > 0 && O.push(g.data);
-      }, p.onstop = () => {
-        const g = new Blob(O, { type: R }), L = URL.createObjectURL(g);
+      }, h.onstop = () => {
+        const g = new Blob(O, { type: R }), D = URL.createObjectURL(g);
         l({
           percentage: 100,
           stage: "completed",
           message: "Video export ready",
-          outputBlobUrl: L
-        }), f(L);
-      }, p.onerror = (g) => {
+          outputBlobUrl: D
+        }), m(D);
+      }, h.onerror = (g) => {
         y(g);
-      }, t.currentTime = i, l({ percentage: 20, stage: "processing", message: "Kareler kaydediliyor..." });
+      }, e.currentTime = i, l({ percentage: 20, stage: "processing", message: "Kareler kaydediliyor..." });
       const U = () => {
-        const g = t.currentTime, L = Math.min(95, 20 + Math.round((g - i) / v * 75));
+        const g = e.currentTime, D = Math.min(95, 20 + Math.round((g - i) / w * 75));
         l({
-          percentage: L,
+          percentage: D,
           stage: "encoding",
-          message: `Kareler işleniyor (%${L})...`
-        }), (g >= r || t.ended) && (t.pause(), t.removeEventListener("timeupdate", U), p.stop());
+          message: `Kareler işleniyor (%${D})...`
+        }), (g >= s || e.ended) && (e.pause(), e.removeEventListener("timeupdate", U), h.stop());
       };
-      t.addEventListener("timeupdate", U), p.start(100), t.play().catch(y);
+      e.addEventListener("timeupdate", U), h.start(100), e.play().catch(y);
     });
   }
   /**
    * Headless / Unit Test simulated export
    */
-  async simulateExport(t, e, i) {
-    const r = [
+  async simulateExport(e, t, i) {
+    const s = [
       { percentage: 25, stage: "extracting", msg: "WASM video akışı kırpılıyor..." },
       { percentage: 55, stage: "processing", msg: "Filtre ve metin katmanları uygulanıyor..." },
       { percentage: 85, stage: "encoding", msg: "H.264 MP4 çıktısı derleniyor..." },
       { percentage: 100, stage: "completed", msg: "Dışa aktarım tamamlandı!" }
     ];
-    for (const l of r)
-      await new Promise((f) => setTimeout(f, 40)), i({ percentage: l.percentage, stage: l.stage, message: l.msg });
-    const a = new Blob(["senkron-real-wasm-mp4-data"], { type: "video/mp4" }), o = typeof URL < "u" && URL.createObjectURL ? URL.createObjectURL(a) : "blob:senkron/wasm-video";
+    for (const l of s)
+      await new Promise((m) => setTimeout(m, 40)), i({ percentage: l.percentage, stage: l.stage, message: l.msg });
+    const r = new Blob(["senkron-real-wasm-mp4-data"], { type: "video/mp4" }), n = typeof URL < "u" && URL.createObjectURL ? URL.createObjectURL(r) : "blob:senkron/wasm-video";
     return i({
       percentage: 100,
       stage: "completed",
       message: "Dışa aktarım tamamlandı!",
-      outputBlobUrl: o
-    }), o;
+      outputBlobUrl: n
+    }), n;
   }
 }
-var pt = Object.defineProperty, u = (s, t, e, i) => {
-  for (var r = void 0, a = s.length - 1, o; a >= 0; a--)
-    (o = s[a]) && (r = o(t, e, r) || r);
-  return r && pt(t, e, r), r;
+var pe = Object.defineProperty, p = (a, e, t, i) => {
+  for (var s = void 0, r = a.length - 1, n; r >= 0; r--)
+    (n = a[r]) && (s = n(e, t, s) || s);
+  return s && pe(e, t, s), s;
 };
-const B = class B extends G {
+const I = class I extends G {
   constructor() {
     super(...arguments), this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.autoplay = !1, this.modalMode = !1, this.isPlaying = !1, this.currentTime = 0, this.duration = 10, this.trimStart = 0, this.trimEnd = 10, this.overlays = [], this.newOverlayText = "", this.isExporting = !1, this.exportProgress = {
       percentage: 0,
       stage: "idle"
-    }, this.exportedVideoUrl = null, this.ffmpegService = new ct(), this.animationFrameId = null, this.renderFrame = () => {
-      const t = this.canvasEl, e = this.videoEl;
-      if (!t || typeof t.getContext != "function") return;
-      const i = t.getContext("2d");
+    }, this.exportedVideoUrl = null, this.fileName = "", this.isDragging = !1, this.ffmpegService = new ce(), this.animationFrameId = null, this.renderFrame = () => {
+      const e = this.canvasEl, t = this.videoEl;
+      if (!e || typeof e.getContext != "function") return;
+      const i = e.getContext("2d");
       if (i) {
-        i.fillStyle = "#06090e", i.fillRect(0, 0, t.width, t.height), e && e.readyState >= 2 ? i.drawImage(e, 0, 0, t.width, t.height) : (i.fillStyle = "#111827", i.fillRect(20, 20, t.width - 40, t.height - 40), i.fillStyle = "#64748b", i.font = "14px sans-serif", i.textAlign = "center", i.fillText(
-          this.src ? "Video Yükleniyor..." : "Video Kaynağı Yüklenmedi",
-          t.width / 2,
-          t.height / 2
+        i.fillStyle = "#06090e", i.fillRect(0, 0, e.width, e.height), t && t.readyState >= 2 ? i.drawImage(t, 0, 0, e.width, e.height) : (i.fillStyle = "#111827", i.fillRect(20, 20, e.width - 40, e.height - 40), i.fillStyle = "#64748b", i.font = "14px sans-serif", i.textAlign = "center", i.fillText(
+          this.src ? "Video Yükleniyor..." : "Video Seçin veya Buraya Sürükleyin",
+          e.width / 2,
+          e.height / 2
         ));
-        for (const r of this.overlays)
-          if (this.currentTime >= r.startTime && this.currentTime <= r.endTime) {
-            i.save(), i.fillStyle = r.color || "#ffffff", i.font = `bold ${r.fontSize || 24}px ${r.fontFamily || "sans-serif"}`, i.textAlign = "center", i.shadowColor = "rgba(0, 0, 0, 0.9)", i.shadowBlur = 8, i.shadowOffsetX = 2, i.shadowOffsetY = 2;
-            const a = t.width * r.x / 100, o = t.height * r.y / 100;
-            i.fillText(r.text, a, o), i.restore();
+        for (const s of this.overlays)
+          if (this.currentTime >= s.startTime && this.currentTime <= s.endTime) {
+            i.save(), i.fillStyle = s.color || "#ffffff", i.font = `bold ${s.fontSize || 24}px ${s.fontFamily || "sans-serif"}`, i.textAlign = "center", i.shadowColor = "rgba(0, 0, 0, 0.9)", i.shadowBlur = 8, i.shadowOffsetX = 2, i.shadowOffsetY = 2;
+            const r = e.width * s.x / 100, n = e.height * s.y / 100;
+            i.fillText(s.text, r, n), i.restore();
           }
         this.isPlaying && (this.animationFrameId = requestAnimationFrame(this.renderFrame));
       }
+    }, this.loadVideoFile = (e) => {
+      const t = e.name || "video.mp4", i = URL.createObjectURL(e);
+      this.src = i, this.fileName = t, this.currentTime = 0, this.trimStart = 0, this.isPlaying = !1, this.videoEl && (this.videoEl.src = i, this.videoEl.load()), this.dispatchEvent(
+        new CustomEvent("senkron:file-selected", {
+          detail: {
+            name: t,
+            size: e.size,
+            type: e.type,
+            url: i
+          },
+          bubbles: !0,
+          composed: !0
+        })
+      );
+    }, this.handleFileInputChange = (e) => {
+      const t = e.target;
+      t.files && t.files[0] && this.loadVideoFile(t.files[0]);
+    }, this.handleDragOver = (e) => {
+      e.preventDefault(), this.isDragging = !0;
+    }, this.handleDragLeave = (e) => {
+      e.preventDefault(), this.isDragging = !1;
+    }, this.handleDrop = (e) => {
+      e.preventDefault(), this.isDragging = !1, e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0] && this.loadVideoFile(e.dataTransfer.files[0]);
     }, this.handleVideoLoaded = () => {
       if (!this.videoEl) return;
-      const t = this.videoEl.duration || 10;
-      this.duration = t, this.trimEnd = t, this.dispatchEvent(
+      const e = this.videoEl.duration || 10;
+      this.duration = e, this.trimEnd = e, this.renderFrame(), this.dispatchEvent(
         new CustomEvent("senkron:ready", {
-          detail: { duration: t },
+          detail: { duration: this.duration },
           bubbles: !0,
           composed: !0
         })
-      ), this.renderFrame();
+      );
     }, this.handleTimeUpdate = () => {
-      this.videoEl && (this.currentTime = this.videoEl.currentTime, this.currentTime >= this.trimEnd && (this.videoEl.currentTime = this.trimStart, this.currentTime = this.trimStart), this.dispatchEvent(
-        new CustomEvent("senkron:timeupdate", {
-          detail: { currentTime: this.currentTime },
+      this.videoEl && (this.currentTime = this.videoEl.currentTime, this.currentTime >= this.trimEnd && (this.videoEl.currentTime = this.trimStart, this.autoplay || (this.videoEl.pause(), this.isPlaying = !1)), this.renderFrame());
+    }, this.togglePlay = () => {
+      const e = this.videoEl;
+      e && (this.isPlaying ? (e.pause(), this.isPlaying = !1) : ((this.currentTime >= this.trimEnd || this.currentTime < this.trimStart) && (e.currentTime = this.trimStart), e.play().catch(() => {
+      }), this.isPlaying = !0, this.renderFrame()));
+    }, this.seek = (e) => {
+      const t = this.videoEl;
+      t && (this.currentTime = Math.max(0, Math.min(this.duration, e)), t.currentTime = this.currentTime, this.renderFrame());
+    }, this.handleTimelineClick = (e) => {
+      const t = e.currentTarget.getBoundingClientRect(), i = (e.clientX - t.left) / t.width;
+      this.seek(i * this.duration);
+    }, this.setTrimStartToCurrent = () => {
+      this.currentTime < this.trimEnd && (this.trimStart = this.currentTime, this.requestUpdate());
+    }, this.setTrimEndToCurrent = () => {
+      this.currentTime > this.trimStart && (this.trimEnd = this.currentTime, this.requestUpdate());
+    }, this.setAspectRatio = (e) => {
+      this.aspectRatio = e, this.setupCanvas(), this.dispatchEvent(
+        new CustomEvent("senkron:aspect-ratio-change", {
+          detail: { aspectRatio: e },
           bubbles: !0,
           composed: !0
         })
-      ), this.renderFrame());
-    }, this.togglePlay = () => {
-      this.videoEl && (this.isPlaying ? (this.videoEl.pause(), this.isPlaying = !1, this.animationFrameId !== null && cancelAnimationFrame(this.animationFrameId)) : ((this.currentTime < this.trimStart || this.currentTime >= this.trimEnd) && (this.videoEl.currentTime = this.trimStart), this.videoEl.play().catch(() => {
-      }), this.isPlaying = !0, this.renderFrame()));
-    }, this.handleSeek = (t) => {
-      const i = t.currentTarget.getBoundingClientRect(), r = t.clientX - i.left, o = Math.max(0, Math.min(1, r / i.width)) * this.duration;
-      this.currentTime = o, this.videoEl && (this.videoEl.currentTime = o), this.renderFrame();
-    }, this.setTrimStartToCurrent = () => {
-      this.trimStart = Math.min(this.currentTime, this.trimEnd - 0.5);
-    }, this.setTrimEndToCurrent = () => {
-      this.trimEnd = Math.max(this.currentTime, this.trimStart + 0.5);
-    }, this.setAspectRatio = (t) => {
-      this.aspectRatio = t, this.setupCanvas();
-    }, this.addTextOverlay = () => {
+      );
+    }, this.addOverlay = () => {
       if (!this.newOverlayText.trim()) return;
-      const t = {
+      const e = {
         id: `overlay-${Date.now()}`,
         text: this.newOverlayText.trim(),
         startTime: this.currentTime,
@@ -853,23 +943,23 @@ const B = class B extends G {
         color: "#07d0e0",
         fontFamily: "sans-serif"
       };
-      this.overlays = [...this.overlays, t], this.newOverlayText = "", this.renderFrame();
-    }, this.removeOverlay = (t) => {
-      this.overlays = this.overlays.filter((e) => e.id !== t), this.renderFrame();
+      this.overlays = [...this.overlays, e], this.newOverlayText = "", this.renderFrame();
+    }, this.removeOverlay = (e) => {
+      this.overlays = this.overlays.filter((t) => t.id !== e), this.renderFrame();
     }, this.startExport = async () => {
       if (!this.videoEl || !this.canvasEl) return null;
       this.isExporting = !0, this.exportedVideoUrl = null;
       try {
-        const t = await this.ffmpegService.exportVideo(
+        const e = await this.ffmpegService.exportVideo(
           this.videoEl,
           this.canvasEl,
           this.trimStart,
           this.trimEnd,
           this.overlays,
-          (e) => {
-            this.exportProgress = e, this.dispatchEvent(
+          (t) => {
+            this.exportProgress = t, this.dispatchEvent(
               new CustomEvent("senkron:export-progress", {
-                detail: e,
+                detail: t,
                 bubbles: !0,
                 composed: !0
               })
@@ -877,34 +967,34 @@ const B = class B extends G {
           },
           this.aspectRatio
         );
-        return this.exportedVideoUrl = t, this.dispatchEvent(
+        return this.exportedVideoUrl = e, this.dispatchEvent(
           new CustomEvent("senkron:export-complete", {
             detail: {
-              outputBlobUrl: t,
+              outputBlobUrl: e,
               duration: this.trimEnd - this.trimStart
             },
             bubbles: !0,
             composed: !0
           })
-        ), t;
-      } catch (t) {
+        ), e;
+      } catch (e) {
         return this.exportProgress = {
           percentage: 0,
           stage: "error",
-          message: t instanceof Error ? t.message : "Export başarısız oldu"
+          message: e instanceof Error ? e.message : "Export başarısız oldu"
         }, this.dispatchEvent(
           new CustomEvent("senkron:error", {
-            detail: { message: "Export failed", error: t },
+            detail: { message: "Export failed", error: e },
             bubbles: !0,
             composed: !0
           })
         ), null;
       }
     }, this.handleAttachToPost = async () => {
-      let t = this.exportedVideoUrl;
-      if (t || (t = await this.startExport()), t) {
-        const e = {
-          videoUrl: t,
+      let e = this.exportedVideoUrl;
+      if (e || (e = await this.startExport()), e) {
+        const t = {
+          videoUrl: e,
           duration: this.trimEnd - this.trimStart,
           aspectRatio: this.aspectRatio,
           trimStart: this.trimStart,
@@ -913,7 +1003,7 @@ const B = class B extends G {
         };
         this.dispatchEvent(
           new CustomEvent("senkron:video-attached", {
-            detail: e,
+            detail: t,
             bubbles: !0,
             composed: !0
           })
@@ -934,52 +1024,76 @@ const B = class B extends G {
   disconnectedCallback() {
     super.disconnectedCallback(), this.animationFrameId !== null && cancelAnimationFrame(this.animationFrameId);
   }
-  firstUpdated(t) {
-    super.firstUpdated(t), this.setupCanvas();
+  firstUpdated(e) {
+    super.firstUpdated(e), this.setupCanvas();
   }
-  updated(t) {
-    super.updated(t), t.has("src") && this.src && this.videoEl && (this.videoEl.src = this.src, this.videoEl.load());
+  updated(e) {
+    super.updated(e), e.has("src") && this.src && this.videoEl && (this.videoEl.src = this.src, this.videoEl.load());
   }
   setupCanvas() {
-    const t = this.canvasEl;
-    if (!t) return;
-    const [e, i] = this.aspectRatio.split(":").map(Number), r = 640, a = r * (i || 9) / (e || 16);
-    t.width = r, t.height = a, this.renderFrame();
+    const e = this.canvasEl;
+    if (!e) return;
+    const [t, i] = this.aspectRatio.split(":").map(Number), s = 640, r = s * (i || 9) / (t || 16);
+    e.width = s, e.height = r, this.renderFrame();
   }
-  formatTime(t) {
-    const e = Math.floor(t / 60), i = Math.floor(t % 60), r = Math.floor(t % 1 * 10);
-    return `${e.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${r}`;
+  formatTime(e) {
+    const t = Math.floor(e / 60), i = Math.floor(e % 60), s = Math.floor(e % 1 * 10);
+    return `${t.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${s}`;
   }
   render() {
-    const t = this.duration > 0 ? this.currentTime / this.duration * 100 : 0, e = this.duration > 0 ? this.trimStart / this.duration * 100 : 0, i = this.duration > 0 ? (this.trimEnd - this.trimStart) / this.duration * 100 : 100;
-    return E`
+    const e = this.duration > 0 ? this.currentTime / this.duration * 100 : 0, t = this.duration > 0 ? this.trimStart / this.duration * 100 : 0, i = this.duration > 0 ? (this.trimEnd - this.trimStart) / this.duration * 100 : 100;
+    return v`
       <div class="editor-container">
         <!-- Header -->
         <div class="editor-header">
-          <div class="editor-title">
+          <div class="editor-title" style="display: flex; align-items: center; gap: 8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"></polygon>
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
             <span>Senkron Video Studio (WASM FFmpeg)</span>
+            ${this.fileName ? v`<span class="file-badge" title="${this.fileName}">📁 ${this.fileName}</span>` : ""}
           </div>
 
-          <div class="aspect-selector">
-            ${["16:9", "9:16", "1:1", "4:5"].map(
-      (r) => E`
-                <button
-                  class="aspect-btn ${this.aspectRatio === r ? "active" : ""}"
-                  @click=${() => this.setAspectRatio(r)}
-                >
-                  ${r}
-                </button>
-              `
+          <div class="header-actions">
+            <label class="upload-btn" title="Cihazınızdan video yükleyin">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>${this.fileName ? "Değiştir" : "Video Yükle"}</span>
+              <input
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*"
+                style="display: none;"
+                @change=${this.handleFileInputChange}
+              />
+            </label>
+
+            <div class="aspect-selector">
+              ${["16:9", "9:16", "1:1", "4:5"].map(
+      (s) => v`
+                  <button
+                    class="aspect-btn ${this.aspectRatio === s ? "active" : ""}"
+                    @click=${() => this.setAspectRatio(s)}
+                  >
+                    ${s}
+                  </button>
+                `
     )}
+            </div>
           </div>
         </div>
 
         <!-- Preview Stage -->
-        <div class="preview-stage">
+        <div
+          class="preview-stage"
+          @dragover=${this.handleDragOver}
+          @dragleave=${this.handleDragLeave}
+          @drop=${this.handleDrop}
+          style="position: relative;"
+        >
           <div class="canvas-wrapper">
             <canvas></canvas>
             <video
@@ -991,7 +1105,23 @@ const B = class B extends G {
             ></video>
           </div>
 
-          ${this.isExporting ? E`
+          ${this.isDragging ? v`
+                <div class="drop-overlay">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#07d0e0" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span style="font-weight: 600; font-size: 14px; color: #07d0e0;">
+                    Video Dosyasını Buraya Bırakın
+                  </span>
+                  <span style="font-size: 12px; color: #94a3b8;">
+                    MP4, WebM, MOV desteklenir
+                  </span>
+                </div>
+              ` : ""}
+
+          ${this.isExporting ? v`
                 <div class="modal-backdrop" style="position: absolute;">
                   <div class="modal-dialog" style="max-width: 360px; padding: 24px; text-align: center;">
                     <div style="font-weight: 700; font-size: 15px; margin-bottom: 12px;">
@@ -1008,7 +1138,7 @@ const B = class B extends G {
                       ${this.exportProgress.message || `${this.exportProgress.percentage}%`}
                     </div>
 
-                    ${this.exportedVideoUrl ? E`
+                    ${this.exportedVideoUrl ? v`
                           <div style="display: flex; gap: 8px; justify-content: center;">
                             <button class="btn btn-primary" @click=${this.handleAttachToPost}>
                               Videoyu Gönderiye Ekle
@@ -1017,7 +1147,7 @@ const B = class B extends G {
                               Kapat
                             </button>
                           </div>
-                        ` : E`
+                        ` : v`
                           <button class="btn" @click=${() => this.isExporting = !1}>
                             İptal
                           </button>
@@ -1040,70 +1170,72 @@ const B = class B extends G {
 
           <div class="playback-group">
             <button class="btn" @click=${this.setTrimStartToCurrent} title="Başlangıç Noktası">
-              Baş [${this.formatTime(this.trimStart)}]
+              [ Başlangıç: ${this.formatTime(this.trimStart)}
             </button>
             <button class="btn" @click=${this.setTrimEndToCurrent} title="Bitiş Noktası">
-              Bit [${this.formatTime(this.trimEnd)}]
+              Bitiş: ${this.formatTime(this.trimEnd)} ]
             </button>
-            <button class="btn btn-primary" @click=${this.handleAttachToPost}>
-              Videoyu Gönderiye Ekle
+          </div>
+
+          <div class="playback-group">
+            <button class="btn btn-primary" @click=${this.startExport} ?disabled=${this.isExporting}>
+              ${this.isExporting ? "İşleniyor..." : "⚡ WASM Dışa Aktar"}
             </button>
           </div>
         </div>
 
-        <!-- CapCut Timeline -->
-        <div class="timeline-container">
-          <div class="timeline-toolbar">
-            <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">
-              Zaman Çizelgesi & Kırpma Aralığı (${this.formatTime(this.trimEnd - this.trimStart)})
-            </span>
-
-            <div class="overlay-editor">
-              <input
-                type="text"
-                class="text-input"
-                placeholder="Altyazı / Metin ekle..."
-                .value=${this.newOverlayText}
-                @input=${(r) => this.newOverlayText = r.target.value}
-                @keydown=${(r) => r.key === "Enter" && this.addTextOverlay()}
-              />
-              <button class="btn" @click=${this.addTextOverlay}>
-                + Metin
-              </button>
+        <!-- Timeline -->
+        <div class="timeline-container" @click=${this.handleTimelineClick}>
+          <div class="timeline-track">
+            <!-- Selected Trim Window -->
+            <div
+              class="trim-window"
+              style="left: ${t}%; width: ${i}%;"
+            >
+              <div class="trim-handle trim-handle-start"></div>
+              <div class="trim-handle trim-handle-end"></div>
             </div>
+
+            <!-- Overlays Indicators -->
+            ${this.overlays.map((s) => {
+      const r = s.startTime / this.duration * 100, n = (s.endTime - s.startTime) / this.duration * 100;
+      return v`
+                <div
+                  class="timeline-overlay-marker"
+                  style="left: ${r}%; width: ${n}%;"
+                  title="${s.text}"
+                ></div>
+              `;
+    })}
+
+            <!-- Playhead -->
+            <div class="playhead" style="left: ${e}%;"></div>
+          </div>
+        </div>
+
+        <!-- Overlays Manager -->
+        <div class="overlays-panel">
+          <div class="overlay-input-group">
+            <input
+              type="text"
+              class="overlay-input"
+              placeholder="Ekrana eklenecek metin katmanı..."
+              .value=${this.newOverlayText}
+              @input=${(s) => this.newOverlayText = s.target.value}
+              @keydown=${(s) => s.key === "Enter" && this.addOverlay()}
+            />
+            <button class="btn" @click=${this.addOverlay}>
+              + Metin Ekle
+            </button>
           </div>
 
-          <div class="track-wrapper" @click=${this.handleSeek}>
-            <div class="track-ruler">
-              <span>00:00</span>
-              <span>${this.formatTime(this.duration / 2)}</span>
-              <span>${this.formatTime(this.duration)}</span>
-            </div>
-
-            <div class="track-content">
-              <div
-                class="trim-region"
-                style="left: ${e}%; width: ${i}%;"
-              ></div>
-              <div class="playhead" style="left: ${t}%;"></div>
-            </div>
-          </div>
-
-          ${this.overlays.length > 0 ? E`
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          ${this.overlays.length > 0 ? v`
+                <div class="overlays-list">
                   ${this.overlays.map(
-      (r) => E`
-                      <div
-                        style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 6px;"
-                      >
-                        <span style="color: #07d0e0; font-weight: 600;">"${r.text}"</span>
-                        <span style="color: #64748b;">
-                          (${this.formatTime(r.startTime)} - ${this.formatTime(r.endTime)})
-                        </span>
-                        <button
-                          style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 2px;"
-                          @click=${() => this.removeOverlay(r.id)}
-                        >
+      (s) => v`
+                      <div class="overlay-tag">
+                        <span>"${s.text}" (${this.formatTime(s.startTime)} - ${this.formatTime(s.endTime)})</span>
+                        <button class="overlay-tag-delete" @click=${() => this.removeOverlay(s.id)}>
                           ✕
                         </button>
                       </div>
@@ -1116,66 +1248,72 @@ const B = class B extends G {
     `;
   }
 };
-B.styles = K;
-let c = B;
-u([
+I.styles = Y;
+let c = I;
+p([
   k({ type: String })
 ], c.prototype, "src");
-u([
+p([
   k({ type: String, attribute: "aspect-ratio" })
 ], c.prototype, "aspectRatio");
-u([
+p([
   k({ type: String })
 ], c.prototype, "theme");
-u([
+p([
   k({ type: Boolean })
 ], c.prototype, "autoplay");
-u([
+p([
   k({ type: Boolean, attribute: "modal-mode" })
 ], c.prototype, "modalMode");
-u([
+p([
   x()
 ], c.prototype, "isPlaying");
-u([
+p([
   x()
 ], c.prototype, "currentTime");
-u([
+p([
   x()
 ], c.prototype, "duration");
-u([
+p([
   x()
 ], c.prototype, "trimStart");
-u([
+p([
   x()
 ], c.prototype, "trimEnd");
-u([
+p([
   x()
 ], c.prototype, "overlays");
-u([
+p([
   x()
 ], c.prototype, "newOverlayText");
-u([
+p([
   x()
 ], c.prototype, "isExporting");
-u([
+p([
   x()
 ], c.prototype, "exportProgress");
-u([
+p([
   x()
 ], c.prototype, "exportedVideoUrl");
-var ht = Object.defineProperty, C = (s, t, e, i) => {
-  for (var r = void 0, a = s.length - 1, o; a >= 0; a--)
-    (o = s[a]) && (r = o(t, e, r) || r);
-  return r && ht(t, e, r), r;
+p([
+  x()
+], c.prototype, "fileName");
+p([
+  x()
+], c.prototype, "isDragging");
+var he = Object.defineProperty, F = (a, e, t, i) => {
+  for (var s = void 0, r = a.length - 1, n; r >= 0; r--)
+    (n = a[r]) && (s = n(e, t, s) || s);
+  return s && he(e, t, s), s;
 };
 const _ = class _ extends G {
   constructor() {
-    super(...arguments), this.open = !1, this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.handleBackdropClick = (t) => {
-      t.target.classList.contains("modal-backdrop") && this.closeModal();
-    }, this.handleVideoAttached = (t) => {
+    super(...arguments), this.open = !1, this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.handleBackdropClick = (e) => {
+      e.target.classList.contains("modal-backdrop") && this.closeModal();
+    }, this.handleVideoAttached = (e) => {
       this.dispatchEvent(
         new CustomEvent("senkron:video-attached", {
-          detail: t.detail,
+          detail: e.detail,
           bubbles: !0,
           composed: !0
         })
@@ -1194,7 +1332,7 @@ const _ = class _ extends G {
     );
   }
   render() {
-    return this.open ? E`
+    return this.open ? v`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
         <div class="modal-dialog">
           <div class="modal-topbar">
@@ -1217,26 +1355,26 @@ const _ = class _ extends G {
           ></senkron-video-editor>
         </div>
       </div>
-    ` : E``;
+    ` : v``;
   }
 };
-_.styles = K;
-let D = _;
-C([
+_.styles = Y;
+let A = _;
+F([
   k({ type: Boolean, reflect: !0 })
-], D.prototype, "open");
-C([
+], A.prototype, "open");
+F([
   k({ type: String })
-], D.prototype, "src");
-C([
+], A.prototype, "src");
+F([
   k({ type: String, attribute: "aspect-ratio" })
-], D.prototype, "aspectRatio");
-C([
+], A.prototype, "aspectRatio");
+F([
   k({ type: String })
-], D.prototype, "theme");
-typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", c), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", D));
+], A.prototype, "theme");
+typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", c), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", A));
 export {
-  ct as FFmpegService,
+  ce as FFmpegService,
   c as SenkronVideoEditor,
-  D as SenkronVideoEditorModal
+  A as SenkronVideoEditorModal
 };

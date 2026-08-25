@@ -55,6 +55,12 @@ export class SenkronVideoEditor extends LitElement {
   @state()
   private exportedVideoUrl: string | null = null;
 
+  @state()
+  private fileName = '';
+
+  @state()
+  private isDragging = false;
+
   private ffmpegService = new FFmpegService();
   private animationFrameId: number | null = null;
 
@@ -124,7 +130,7 @@ export class SenkronVideoEditor extends LitElement {
       ctx.font = '14px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(
-        this.src ? 'Video Yükleniyor...' : 'Video Kaynağı Yüklenmedi',
+        this.src ? 'Video Yükleniyor...' : 'Video Seçin veya Buraya Sürükleyin',
         canvas.width / 2,
         canvas.height / 2
       );
@@ -153,19 +159,73 @@ export class SenkronVideoEditor extends LitElement {
     }
   };
 
+  public loadVideoFile = (file: File | Blob): void => {
+    const fileName = (file as File).name || 'video.mp4';
+    const objectUrl = URL.createObjectURL(file);
+    this.src = objectUrl;
+    this.fileName = fileName;
+    this.currentTime = 0;
+    this.trimStart = 0;
+    this.isPlaying = false;
+
+    if (this.videoEl) {
+      this.videoEl.src = objectUrl;
+      this.videoEl.load();
+    }
+
+    this.dispatchEvent(
+      new CustomEvent('senkron:file-selected', {
+        detail: {
+          name: fileName,
+          size: file.size,
+          type: file.type,
+          url: objectUrl,
+        },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  };
+
+  private handleFileInputChange = (e: Event): void => {
+    const input = e.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.loadVideoFile(input.files[0]);
+    }
+  };
+
+  private handleDragOver = (e: DragEvent): void => {
+    e.preventDefault();
+    this.isDragging = true;
+  };
+
+  private handleDragLeave = (e: DragEvent): void => {
+    e.preventDefault();
+    this.isDragging = false;
+  };
+
+  private handleDrop = (e: DragEvent): void => {
+    e.preventDefault();
+    this.isDragging = false;
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      this.loadVideoFile(e.dataTransfer.files[0]);
+    }
+  };
+
   private handleVideoLoaded = (): void => {
     if (!this.videoEl) return;
     const dur = this.videoEl.duration || 10;
     this.duration = dur;
     this.trimEnd = dur;
+    this.renderFrame();
+
     this.dispatchEvent(
       new CustomEvent('senkron:ready', {
-        detail: { duration: dur },
+        detail: { duration: this.duration },
         bubbles: true,
         composed: true,
       })
     );
-    this.renderFrame();
   };
 
   private handleTimeUpdate = (): void => {
@@ -174,66 +234,74 @@ export class SenkronVideoEditor extends LitElement {
 
     if (this.currentTime >= this.trimEnd) {
       this.videoEl.currentTime = this.trimStart;
-      this.currentTime = this.trimStart;
+      if (!this.autoplay) {
+        this.videoEl.pause();
+        this.isPlaying = false;
+      }
     }
 
-    this.dispatchEvent(
-      new CustomEvent('senkron:timeupdate', {
-        detail: { currentTime: this.currentTime },
-        bubbles: true,
-        composed: true,
-      })
-    );
     this.renderFrame();
   };
 
   private togglePlay = (): void => {
-    if (!this.videoEl) return;
+    const video = this.videoEl;
+    if (!video) return;
 
     if (this.isPlaying) {
-      this.videoEl.pause();
+      video.pause();
       this.isPlaying = false;
-      if (this.animationFrameId !== null) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
     } else {
-      if (this.currentTime < this.trimStart || this.currentTime >= this.trimEnd) {
-        this.videoEl.currentTime = this.trimStart;
+      if (this.currentTime >= this.trimEnd || this.currentTime < this.trimStart) {
+        video.currentTime = this.trimStart;
       }
-      this.videoEl.play().catch(() => {});
+      video.play().catch(() => {});
       this.isPlaying = true;
       this.renderFrame();
     }
   };
 
-  private handleSeek = (e: MouseEvent): void => {
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-    const newTime = ratio * this.duration;
+  private seek = (time: number): void => {
+    const video = this.videoEl;
+    if (!video) return;
 
-    this.currentTime = newTime;
-    if (this.videoEl) {
-      this.videoEl.currentTime = newTime;
-    }
+    this.currentTime = Math.max(0, Math.min(this.duration, time));
+    video.currentTime = this.currentTime;
     this.renderFrame();
   };
 
+  private handleTimelineClick = (e: MouseEvent): void => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    this.seek(pos * this.duration);
+  };
+
   private setTrimStartToCurrent = (): void => {
-    this.trimStart = Math.min(this.currentTime, this.trimEnd - 0.5);
+    if (this.currentTime < this.trimEnd) {
+      this.trimStart = this.currentTime;
+      this.requestUpdate();
+    }
   };
 
   private setTrimEndToCurrent = (): void => {
-    this.trimEnd = Math.max(this.currentTime, this.trimStart + 0.5);
+    if (this.currentTime > this.trimStart) {
+      this.trimEnd = this.currentTime;
+      this.requestUpdate();
+    }
   };
 
   private setAspectRatio = (ratio: string): void => {
     this.aspectRatio = ratio;
     this.setupCanvas();
+    this.dispatchEvent(
+      new CustomEvent('senkron:aspect-ratio-change', {
+        detail: { aspectRatio: ratio },
+        bubbles: true,
+        composed: true,
+      })
+    );
   };
 
-  private addTextOverlay = (): void => {
+  private addOverlay = (): void => {
     if (!this.newOverlayText.trim()) return;
 
     const newOverlay: TextOverlay = {
@@ -356,30 +424,56 @@ export class SenkronVideoEditor extends LitElement {
       <div class="editor-container">
         <!-- Header -->
         <div class="editor-header">
-          <div class="editor-title">
+          <div class="editor-title" style="display: flex; align-items: center; gap: 8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"></polygon>
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
             <span>Senkron Video Studio (WASM FFmpeg)</span>
+            ${this.fileName
+              ? html`<span class="file-badge" title="${this.fileName}">📁 ${this.fileName}</span>`
+              : ''}
           </div>
 
-          <div class="aspect-selector">
-            ${['16:9', '9:16', '1:1', '4:5'].map(
-              (ratio) => html`
-                <button
-                  class="aspect-btn ${this.aspectRatio === ratio ? 'active' : ''}"
-                  @click=${() => this.setAspectRatio(ratio)}
-                >
-                  ${ratio}
-                </button>
-              `
-            )}
+          <div class="header-actions">
+            <label class="upload-btn" title="Cihazınızdan video yükleyin">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>${this.fileName ? 'Değiştir' : 'Video Yükle'}</span>
+              <input
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*"
+                style="display: none;"
+                @change=${this.handleFileInputChange}
+              />
+            </label>
+
+            <div class="aspect-selector">
+              ${['16:9', '9:16', '1:1', '4:5'].map(
+                (ratio) => html`
+                  <button
+                    class="aspect-btn ${this.aspectRatio === ratio ? 'active' : ''}"
+                    @click=${() => this.setAspectRatio(ratio)}
+                  >
+                    ${ratio}
+                  </button>
+                `
+              )}
+            </div>
           </div>
         </div>
 
         <!-- Preview Stage -->
-        <div class="preview-stage">
+        <div
+          class="preview-stage"
+          @dragover=${this.handleDragOver}
+          @dragleave=${this.handleDragLeave}
+          @drop=${this.handleDrop}
+          style="position: relative;"
+        >
           <div class="canvas-wrapper">
             <canvas></canvas>
             <video
@@ -390,6 +484,24 @@ export class SenkronVideoEditor extends LitElement {
               @ended=${() => (this.isPlaying = false)}
             ></video>
           </div>
+
+          ${this.isDragging
+            ? html`
+                <div class="drop-overlay">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#07d0e0" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span style="font-weight: 600; font-size: 14px; color: #07d0e0;">
+                    Video Dosyasını Buraya Bırakın
+                  </span>
+                  <span style="font-size: 12px; color: #94a3b8;">
+                    MP4, WebM, MOV desteklenir
+                  </span>
+                </div>
+              `
+            : ''}
 
           ${this.isExporting
             ? html`
@@ -448,71 +560,74 @@ export class SenkronVideoEditor extends LitElement {
 
           <div class="playback-group">
             <button class="btn" @click=${this.setTrimStartToCurrent} title="Başlangıç Noktası">
-              Baş [${this.formatTime(this.trimStart)}]
+              [ Başlangıç: ${this.formatTime(this.trimStart)}
             </button>
             <button class="btn" @click=${this.setTrimEndToCurrent} title="Bitiş Noktası">
-              Bit [${this.formatTime(this.trimEnd)}]
+              Bitiş: ${this.formatTime(this.trimEnd)} ]
             </button>
-            <button class="btn btn-primary" @click=${this.handleAttachToPost}>
-              Videoyu Gönderiye Ekle
+          </div>
+
+          <div class="playback-group">
+            <button class="btn btn-primary" @click=${this.startExport} ?disabled=${this.isExporting}>
+              ${this.isExporting ? 'İşleniyor...' : '⚡ WASM Dışa Aktar'}
             </button>
           </div>
         </div>
 
-        <!-- CapCut Timeline -->
-        <div class="timeline-container">
-          <div class="timeline-toolbar">
-            <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">
-              Zaman Çizelgesi & Kırpma Aralığı (${this.formatTime(this.trimEnd - this.trimStart)})
-            </span>
-
-            <div class="overlay-editor">
-              <input
-                type="text"
-                class="text-input"
-                placeholder="Altyazı / Metin ekle..."
-                .value=${this.newOverlayText}
-                @input=${(e: Event) => (this.newOverlayText = (e.target as HTMLInputElement).value)}
-                @keydown=${(e: KeyboardEvent) => e.key === 'Enter' && this.addTextOverlay()}
-              />
-              <button class="btn" @click=${this.addTextOverlay}>
-                + Metin
-              </button>
+        <!-- Timeline -->
+        <div class="timeline-container" @click=${this.handleTimelineClick}>
+          <div class="timeline-track">
+            <!-- Selected Trim Window -->
+            <div
+              class="trim-window"
+              style="left: ${trimStartPercent}%; width: ${trimWidthPercent}%;"
+            >
+              <div class="trim-handle trim-handle-start"></div>
+              <div class="trim-handle trim-handle-end"></div>
             </div>
+
+            <!-- Overlays Indicators -->
+            ${this.overlays.map((overlay) => {
+              const start = (overlay.startTime / this.duration) * 100;
+              const width = ((overlay.endTime - overlay.startTime) / this.duration) * 100;
+              return html`
+                <div
+                  class="timeline-overlay-marker"
+                  style="left: ${start}%; width: ${width}%;"
+                  title="${overlay.text}"
+                ></div>
+              `;
+            })}
+
+            <!-- Playhead -->
+            <div class="playhead" style="left: ${playheadPercent}%;"></div>
           </div>
+        </div>
 
-          <div class="track-wrapper" @click=${this.handleSeek}>
-            <div class="track-ruler">
-              <span>00:00</span>
-              <span>${this.formatTime(this.duration / 2)}</span>
-              <span>${this.formatTime(this.duration)}</span>
-            </div>
-
-            <div class="track-content">
-              <div
-                class="trim-region"
-                style="left: ${trimStartPercent}%; width: ${trimWidthPercent}%;"
-              ></div>
-              <div class="playhead" style="left: ${playheadPercent}%;"></div>
-            </div>
+        <!-- Overlays Manager -->
+        <div class="overlays-panel">
+          <div class="overlay-input-group">
+            <input
+              type="text"
+              class="overlay-input"
+              placeholder="Ekrana eklenecek metin katmanı..."
+              .value=${this.newOverlayText}
+              @input=${(e: Event) => (this.newOverlayText = (e.target as HTMLInputElement).value)}
+              @keydown=${(e: KeyboardEvent) => e.key === 'Enter' && this.addOverlay()}
+            />
+            <button class="btn" @click=${this.addOverlay}>
+              + Metin Ekle
+            </button>
           </div>
 
           ${this.overlays.length > 0
             ? html`
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <div class="overlays-list">
                   ${this.overlays.map(
-                    (ov) => html`
-                      <div
-                        style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 6px;"
-                      >
-                        <span style="color: #07d0e0; font-weight: 600;">"${ov.text}"</span>
-                        <span style="color: #64748b;">
-                          (${this.formatTime(ov.startTime)} - ${this.formatTime(ov.endTime)})
-                        </span>
-                        <button
-                          style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 2px;"
-                          @click=${() => this.removeOverlay(ov.id)}
-                        >
+                    (overlay) => html`
+                      <div class="overlay-tag">
+                        <span>"${overlay.text}" (${this.formatTime(overlay.startTime)} - ${this.formatTime(overlay.endTime)})</span>
+                        <button class="overlay-tag-delete" @click=${() => this.removeOverlay(overlay.id)}>
                           ✕
                         </button>
                       </div>
