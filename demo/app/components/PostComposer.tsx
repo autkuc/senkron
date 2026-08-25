@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import type { VideoAttachedDetail } from '@senkron/components';
 
 interface PostComposerProps {
   onOpenVideoModal: () => void;
   onOpenAiModal: () => void;
-  onUploadVideoFile?: (file: File) => void;
   attachedVideo: VideoAttachedDetail | null;
   onRemoveVideo: () => void;
   postText: string;
@@ -17,15 +16,12 @@ interface PostComposerProps {
 export const PostComposer: React.FC<PostComposerProps> = ({
   onOpenVideoModal,
   onOpenAiModal,
-  onUploadVideoFile,
   attachedVideo,
   onRemoveVideo,
   postText,
   onPostTextChange,
   onPublish,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const handleSubmit = () => {
     if (!postText.trim() && !attachedVideo) return;
     onPublish({
@@ -33,17 +29,6 @@ export const PostComposer: React.FC<PostComposerProps> = ({
       video: attachedVideo || undefined,
     });
     onPostTextChange('');
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (onUploadVideoFile) {
-        onUploadVideoFile(file);
-      }
-      // Reset input value so same file can be re-selected if needed
-      e.target.value = '';
-    }
   };
 
   return (
@@ -97,40 +82,18 @@ export const PostComposer: React.FC<PostComposerProps> = ({
       {/* Action Toolbar */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Direct Video File Upload Button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-medium flex items-center gap-1.5 transition"
-            title="Bilgisayarınızdan video yükleyin ve WASM düzenleyicide açın"
-          >
-            <svg className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span>Video Yükle</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
-          {/* Video Studio Trigger with Default Sample */}
+          {/* Video Studio Trigger */}
           <button
             type="button"
             onClick={onOpenVideoModal}
             className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition"
-            title="TEKNOFEST Örnek Videosuyla Video Stüdyosunu Aç"
+            title="Video Düzenle"
           >
-            <svg className="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
-            <span>Stüdyoyu Aç</span>
+            <span>Video Düzenle</span>
           </button>
 
           {/* AI Post Assistant Trigger */}

@@ -23,13 +23,15 @@ export declare class SenkronVideoEditor extends LitElement {
     private animationFrameId;
     private get videoEl();
     private get canvasEl();
+    private get fileInputEl();
     connectedCallback(): void;
     disconnectedCallback(): void;
     protected firstUpdated(_changedProperties: PropertyValues): void;
     protected updated(changedProperties: PropertyValues): void;
     private setupCanvas;
-    private renderFrame;
+    private renderOverlays;
     loadVideoFile: (file: File | Blob) => void;
+    private triggerFilePicker;
     private handleFileInputChange;
     private handleDragOver;
     private handleDragLeave;

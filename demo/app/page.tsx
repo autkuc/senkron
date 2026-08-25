@@ -132,13 +132,6 @@ export default function NSosyalDemoPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const handleUploadVideoFile = (file: File) => {
-    const objectUrl = URL.createObjectURL(file);
-    setActiveVideoSrc(objectUrl);
-    setIsVideoModalOpen(true);
-    showToast(`"${file.name}" yüklendi (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
-  };
-
   const handleVideoAttached = (detail: VideoAttachedDetail) => {
     setAttachedVideo(detail);
     setIsVideoModalOpen(false);
@@ -296,12 +289,8 @@ export default function NSosyalDemoPage() {
 
           {/* Post Composer Area */}
           <PostComposer
-            onOpenVideoModal={() => {
-              setActiveVideoSrc('/videos/teknofest-sample.mp4');
-              setIsVideoModalOpen(true);
-            }}
+            onOpenVideoModal={() => setIsVideoModalOpen(true)}
             onOpenAiModal={() => setIsAiModalOpen(true)}
-            onUploadVideoFile={handleUploadVideoFile}
             attachedVideo={attachedVideo}
             onRemoveVideo={() => setAttachedVideo(null)}
             postText={postText}

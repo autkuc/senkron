@@ -69,7 +69,11 @@ export class SenkronVideoEditor extends LitElement {
   }
 
   private get canvasEl(): HTMLCanvasElement | null {
-    return this.renderRoot.querySelector('canvas');
+    return this.renderRoot.querySelector('canvas.overlay-canvas');
+  }
+
+  private get fileInputEl(): HTMLInputElement | null {
+    return this.renderRoot.querySelector('input[type="file"]');
   }
 
   connectedCallback(): void {
@@ -95,46 +99,38 @@ export class SenkronVideoEditor extends LitElement {
       this.videoEl.src = this.src;
       this.videoEl.load();
     }
+    if (changedProperties.has('aspectRatio')) {
+      this.setupCanvas();
+    }
   }
 
   private setupCanvas(): void {
     const canvas = this.canvasEl;
+    const video = this.videoEl;
     if (!canvas) return;
 
-    const [wRatio, hRatio] = this.aspectRatio.split(':').map(Number);
-    const baseWidth = 640;
-    const baseHeight = (baseWidth * (hRatio || 9)) / (wRatio || 16);
+    if (video && video.videoWidth && video.videoHeight) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+    } else {
+      const [wRatio, hRatio] = this.aspectRatio.split(':').map(Number);
+      const baseWidth = 640;
+      const baseHeight = (baseWidth * (hRatio || 9)) / (wRatio || 16);
+      canvas.width = baseWidth;
+      canvas.height = baseHeight;
+    }
 
-    canvas.width = baseWidth;
-    canvas.height = baseHeight;
-    this.renderFrame();
+    this.renderOverlays();
   }
 
-  private renderFrame = (): void => {
+  private renderOverlays = (): void => {
     const canvas = this.canvasEl;
-    const video = this.videoEl;
     if (!canvas || typeof canvas.getContext !== 'function') return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#06090e';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (video && video.readyState >= 2) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    } else {
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
-      ctx.fillStyle = '#64748b';
-      ctx.font = '14px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(
-        this.src ? 'Video Yükleniyor...' : 'Video Seçin veya Buraya Sürükleyin',
-        canvas.width / 2,
-        canvas.height / 2
-      );
-    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (const overlay of this.overlays) {
       if (this.currentTime >= overlay.startTime && this.currentTime <= overlay.endTime) {
@@ -155,7 +151,7 @@ export class SenkronVideoEditor extends LitElement {
     }
 
     if (this.isPlaying) {
-      this.animationFrameId = requestAnimationFrame(this.renderFrame);
+      this.animationFrameId = requestAnimationFrame(this.renderOverlays);
     }
   };
 
@@ -185,6 +181,10 @@ export class SenkronVideoEditor extends LitElement {
         composed: true,
       })
     );
+  };
+
+  private triggerFilePicker = (): void => {
+    this.fileInputEl?.click();
   };
 
   private handleFileInputChange = (e: Event): void => {
@@ -217,7 +217,7 @@ export class SenkronVideoEditor extends LitElement {
     const dur = this.videoEl.duration || 10;
     this.duration = dur;
     this.trimEnd = dur;
-    this.renderFrame();
+    this.setupCanvas();
 
     this.dispatchEvent(
       new CustomEvent('senkron:ready', {
@@ -240,7 +240,7 @@ export class SenkronVideoEditor extends LitElement {
       }
     }
 
-    this.renderFrame();
+    this.renderOverlays();
   };
 
   private togglePlay = (): void => {
@@ -256,7 +256,7 @@ export class SenkronVideoEditor extends LitElement {
       }
       video.play().catch(() => {});
       this.isPlaying = true;
-      this.renderFrame();
+      this.renderOverlays();
     }
   };
 
@@ -266,12 +266,12 @@ export class SenkronVideoEditor extends LitElement {
 
     this.currentTime = Math.max(0, Math.min(this.duration, time));
     video.currentTime = this.currentTime;
-    this.renderFrame();
+    this.renderOverlays();
   };
 
   private handleTimelineClick = (e: MouseEvent): void => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     this.seek(pos * this.duration);
   };
 
@@ -318,12 +318,12 @@ export class SenkronVideoEditor extends LitElement {
 
     this.overlays = [...this.overlays, newOverlay];
     this.newOverlayText = '';
-    this.renderFrame();
+    this.renderOverlays();
   };
 
   private removeOverlay = (id: string): void => {
     this.overlays = this.overlays.filter((o) => o.id !== id);
-    this.renderFrame();
+    this.renderOverlays();
   };
 
   private startExport = async (): Promise<string | null> => {
@@ -424,7 +424,7 @@ export class SenkronVideoEditor extends LitElement {
       <div class="editor-container">
         <!-- Header -->
         <div class="editor-header">
-          <div class="editor-title" style="display: flex; align-items: center; gap: 8px;">
+          <div class="editor-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"></polygon>
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
@@ -436,13 +436,14 @@ export class SenkronVideoEditor extends LitElement {
           </div>
 
           <div class="header-actions">
+            <!-- Video Upload Button inside Editor Modal -->
             <label class="upload-btn" title="Cihazınızdan video yükleyin">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
-              <span>${this.fileName ? 'Değiştir' : 'Video Yükle'}</span>
+              <span>${this.src ? 'Videoyu Değiştir' : 'Video Yükle'}</span>
               <input
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*"
@@ -451,6 +452,7 @@ export class SenkronVideoEditor extends LitElement {
               />
             </label>
 
+            <!-- Aspect Ratio Selector -->
             <div class="aspect-selector">
               ${['16:9', '9:16', '1:1', '4:5'].map(
                 (ratio) => html`
@@ -472,18 +474,39 @@ export class SenkronVideoEditor extends LitElement {
           @dragover=${this.handleDragOver}
           @dragleave=${this.handleDragLeave}
           @drop=${this.handleDrop}
-          style="position: relative;"
         >
-          <div class="canvas-wrapper">
-            <canvas></canvas>
-            <video
-              playsinline
-              crossorigin="anonymous"
-              @loadedmetadata=${this.handleVideoLoaded}
-              @timeupdate=${this.handleTimeUpdate}
-              @ended=${() => (this.isPlaying = false)}
-            ></video>
-          </div>
+          ${this.src
+            ? html`
+                <div class="video-preview-wrapper">
+                  <video
+                    playsinline
+                    crossorigin="anonymous"
+                    .src=${this.src}
+                    @loadedmetadata=${this.handleVideoLoaded}
+                    @timeupdate=${this.handleTimeUpdate}
+                    @ended=${() => (this.isPlaying = false)}
+                    @click=${this.togglePlay}
+                  ></video>
+                  <canvas class="overlay-canvas"></canvas>
+                </div>
+              `
+            : html`
+                <div class="empty-stage-dropzone" @click=${this.triggerFilePicker}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#07d0e0" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <div>
+                    <div style="font-weight: 600; font-size: 15px; color: #f1f5f9; margin-bottom: 4px;">
+                      Video Dosyasını Buraya Sürükleyin veya Seçin
+                    </div>
+                    <div style="font-size: 12px; color: #64748b;">
+                      MP4, WebM, MOV desteklenir • İstemci taraflı WASM işleme
+                    </div>
+                  </div>
+                </div>
+              `}
 
           ${this.isDragging
             ? html`
@@ -493,12 +516,7 @@ export class SenkronVideoEditor extends LitElement {
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                   </svg>
-                  <span style="font-weight: 600; font-size: 14px; color: #07d0e0;">
-                    Video Dosyasını Buraya Bırakın
-                  </span>
-                  <span style="font-size: 12px; color: #94a3b8;">
-                    MP4, WebM, MOV desteklenir
-                  </span>
+                  <span>Video Dosyasını Bırakın</span>
                 </div>
               `
             : ''}
@@ -506,8 +524,8 @@ export class SenkronVideoEditor extends LitElement {
           ${this.isExporting
             ? html`
                 <div class="modal-backdrop" style="position: absolute;">
-                  <div class="modal-dialog" style="max-width: 360px; padding: 24px; text-align: center;">
-                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 12px;">
+                  <div class="modal-dialog" style="max-width: 380px; padding: 24px; text-align: center;">
+                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 12px; color: #f1f5f9;">
                       ${this.exportProgress.stage === 'completed'
                         ? '🎉 Video Render Tamamlandı!'
                         : this.exportProgress.stage === 'error'
@@ -515,13 +533,13 @@ export class SenkronVideoEditor extends LitElement {
                         : '⚡ WASM FFmpeg ile İşleniyor...'}
                     </div>
 
-                    <div style="height: 6px; background: #1e293b; border-radius: 9999px; overflow: hidden; margin-bottom: 8px;">
+                    <div style="height: 6px; background: #1e293b; border-radius: 9999px; overflow: hidden; margin-bottom: 10px;">
                       <div
                         style="height: 100%; width: ${this.exportProgress.percentage}%; background: linear-gradient(90deg, #07d0e0, #324bff); transition: width 0.2s ease;"
                       ></div>
                     </div>
 
-                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 16px;">
+                    <div style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
                       ${this.exportProgress.message || `${this.exportProgress.percentage}%`}
                     </div>
 
@@ -550,41 +568,41 @@ export class SenkronVideoEditor extends LitElement {
         <!-- Controls Bar -->
         <div class="controls-bar">
           <div class="playback-group">
-            <button class="btn" @click=${this.togglePlay}>
+            <button class="btn" @click=${this.togglePlay} ?disabled=${!this.src}>
               ${this.isPlaying ? 'Duraklat' : 'Oynat'}
             </button>
-            <span class="timecode">
-              ${this.formatTime(this.currentTime)} / ${this.formatTime(this.duration)}
-            </span>
-          </div>
-
-          <div class="playback-group">
-            <button class="btn" @click=${this.setTrimStartToCurrent} title="Başlangıç Noktası">
-              [ Başlangıç: ${this.formatTime(this.trimStart)}
+            <button class="btn" @click=${this.setTrimStartToCurrent} ?disabled=${!this.src} title="Başlangıç Noktası Ayarla">
+              [ Başlangıç
             </button>
-            <button class="btn" @click=${this.setTrimEndToCurrent} title="Bitiş Noktası">
-              Bitiş: ${this.formatTime(this.trimEnd)} ]
+            <button class="btn" @click=${this.setTrimEndToCurrent} ?disabled=${!this.src} title="Bitiş Noktası Ayarla">
+              Bitiş ]
             </button>
           </div>
 
           <div class="playback-group">
-            <button class="btn btn-primary" @click=${this.startExport} ?disabled=${this.isExporting}>
+            <button
+              class="btn btn-primary"
+              @click=${this.startExport}
+              ?disabled=${!this.src || this.isExporting}
+            >
               ${this.isExporting ? 'İşleniyor...' : '⚡ WASM Dışa Aktar'}
             </button>
           </div>
         </div>
 
         <!-- Timeline -->
-        <div class="timeline-container" @click=${this.handleTimelineClick}>
-          <div class="timeline-track">
+        <div class="timeline-section">
+          <div class="timecode-display">
+            <span>Seçili Aralık: ${this.formatTime(this.trimStart)} - ${this.formatTime(this.trimEnd)}</span>
+            <span>Konum: ${this.formatTime(this.currentTime)} / ${this.formatTime(this.duration)}</span>
+          </div>
+
+          <div class="timeline-scrubber-track" @click=${this.handleTimelineClick}>
             <!-- Selected Trim Window -->
             <div
-              class="trim-window"
+              class="timeline-trim-region"
               style="left: ${trimStartPercent}%; width: ${trimWidthPercent}%;"
-            >
-              <div class="trim-handle trim-handle-start"></div>
-              <div class="trim-handle trim-handle-end"></div>
-            </div>
+            ></div>
 
             <!-- Overlays Indicators -->
             ${this.overlays.map((overlay) => {
@@ -610,12 +628,12 @@ export class SenkronVideoEditor extends LitElement {
             <input
               type="text"
               class="overlay-input"
-              placeholder="Ekrana eklenecek metin katmanı..."
+              placeholder="Videoya metin katmanı ekle (örn: #TEKNOFEST2026)..."
               .value=${this.newOverlayText}
               @input=${(e: Event) => (this.newOverlayText = (e.target as HTMLInputElement).value)}
               @keydown=${(e: KeyboardEvent) => e.key === 'Enter' && this.addOverlay()}
             />
-            <button class="btn" @click=${this.addOverlay}>
+            <button class="btn" @click=${this.addOverlay} ?disabled=${!this.src}>
               + Metin Ekle
             </button>
           </div>
