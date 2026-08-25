@@ -280,7 +280,8 @@ export class SenkronVideoEditor extends LitElement {
               composed: true,
             })
           );
-        }
+        },
+        this.aspectRatio
       );
 
       this.exportedVideoUrl = outputUrl;

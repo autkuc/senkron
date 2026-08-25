@@ -46,6 +46,9 @@
   "author": "Senkron",
   "license": "MIT",
   "dependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "lit": "^3.1.2"
   },
   "peerDependencies": {
@@ -64,12 +67,12 @@
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "happy-dom": "^13.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "vite-plugin-dts": "^3.7.2",
-    "vitest": "^1.2.1",
-    "happy-dom": "^13.3.1"
+    "vitest": "^1.2.1"
   }
 }

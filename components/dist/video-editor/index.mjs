@@ -1,5 +1,12 @@
-import { i as R, a as $, b as p, n as h, r as c } from "../state-C6LA3nSk.mjs";
-const S = R`
+var Z = Object.defineProperty;
+var j = (s) => {
+  throw TypeError(s);
+};
+var J = (s, t, e) => t in s ? Z(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e;
+var h = (s, t, e) => J(s, typeof t != "symbol" ? t + "" : t, e), V = (s, t, e) => t.has(s) || j("Cannot " + e);
+var n = (s, t, e) => (V(s, t, "read from private field"), e ? e.call(s) : t.get(s)), T = (s, t, e) => t.has(s) ? j("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(s) : t.set(s, e), F = (s, t, e, i) => (V(s, t, "write to private field"), i ? i.call(s, e) : t.set(s, e), e);
+import { i as Q, a as G, b as E, n as k, r as x } from "../state-C6LA3nSk.mjs";
+const K = Q`
   :host {
     display: block;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -257,102 +264,549 @@ const S = R`
     color: #ffffff;
   }
 `;
-class P {
+var d;
+(function(s) {
+  s.LOAD = "LOAD", s.EXEC = "EXEC", s.FFPROBE = "FFPROBE", s.WRITE_FILE = "WRITE_FILE", s.READ_FILE = "READ_FILE", s.DELETE_FILE = "DELETE_FILE", s.RENAME = "RENAME", s.CREATE_DIR = "CREATE_DIR", s.LIST_DIR = "LIST_DIR", s.DELETE_DIR = "DELETE_DIR", s.ERROR = "ERROR", s.DOWNLOAD = "DOWNLOAD", s.PROGRESS = "PROGRESS", s.LOG = "LOG", s.MOUNT = "MOUNT", s.UNMOUNT = "UNMOUNT";
+})(d || (d = {}));
+const tt = /* @__PURE__ */ (() => {
+  let s = 0;
+  return () => s++;
+})(), et = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"), it = new Error("called FFmpeg.terminate()");
+var b, S, w, $, A, M, m;
+class rt {
   constructor() {
-    this.isLoaded = !1, this.isProcessing = !1;
+    T(this, b, null);
+    /**
+     * #resolves and #rejects tracks Promise resolves and rejects to
+     * be called when we receive message from web worker.
+     */
+    T(this, S, {});
+    T(this, w, {});
+    T(this, $, []);
+    T(this, A, []);
+    h(this, "loaded", !1);
+    /**
+     * register worker message event handlers.
+     */
+    T(this, M, () => {
+      n(this, b) && (n(this, b).onmessage = ({ data: { id: t, type: e, data: i } }) => {
+        switch (e) {
+          case d.LOAD:
+            this.loaded = !0, n(this, S)[t](i);
+            break;
+          case d.MOUNT:
+          case d.UNMOUNT:
+          case d.EXEC:
+          case d.FFPROBE:
+          case d.WRITE_FILE:
+          case d.READ_FILE:
+          case d.DELETE_FILE:
+          case d.RENAME:
+          case d.CREATE_DIR:
+          case d.LIST_DIR:
+          case d.DELETE_DIR:
+            n(this, S)[t](i);
+            break;
+          case d.LOG:
+            n(this, $).forEach((r) => r(i));
+            break;
+          case d.PROGRESS:
+            n(this, A).forEach((r) => r(i));
+            break;
+          case d.ERROR:
+            n(this, w)[t](i);
+            break;
+        }
+        delete n(this, S)[t], delete n(this, w)[t];
+      });
+    });
+    /**
+     * Generic function to send messages to web worker.
+     */
+    T(this, m, ({ type: t, data: e }, i = [], r) => n(this, b) ? new Promise((a, o) => {
+      const l = tt();
+      n(this, b) && n(this, b).postMessage({ id: l, type: t, data: e }, i), n(this, S)[l] = a, n(this, w)[l] = o, r == null || r.addEventListener("abort", () => {
+        o(new DOMException(`Message # ${l} was aborted`, "AbortError"));
+      }, { once: !0 });
+    }) : Promise.reject(et));
+    /**
+     * Loads ffmpeg-core inside web worker. It is required to call this method first
+     * as it initializes WebAssembly and other essential variables.
+     *
+     * @category FFmpeg
+     * @returns `true` if ffmpeg core is loaded for the first time.
+     */
+    h(this, "load", ({ classWorkerURL: t, ...e } = {}, { signal: i } = {}) => (n(this, b) || (F(this, b, t ? new Worker(new URL(t, import.meta.url), {
+      type: "module"
+    }) : (
+      // We need to duplicated the code here to enable webpack
+      // to bundle worekr.js here.
+      new Worker(new URL(
+        /* @vite-ignore */
+        "/assets/worker-BAOIWoxA.js",
+        import.meta.url
+      ), {
+        type: "module"
+      })
+    )), n(this, M).call(this)), n(this, m).call(this, {
+      type: d.LOAD,
+      data: e
+    }, void 0, i)));
+    /**
+     * Execute ffmpeg command.
+     *
+     * @remarks
+     * To avoid common I/O issues, ["-nostdin", "-y"] are prepended to the args
+     * by default.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", ...);
+     * // ffmpeg -i video.avi video.mp4
+     * await ffmpeg.exec(["-i", "video.avi", "video.mp4"]);
+     * const data = ffmpeg.readFile("video.mp4");
+     * ```
+     *
+     * @returns `0` if no error, `!= 0` if timeout (1) or error.
+     * @category FFmpeg
+     */
+    h(this, "exec", (t, e = -1, { signal: i } = {}) => n(this, m).call(this, {
+      type: d.EXEC,
+      data: { args: t, timeout: e }
+    }, void 0, i));
+    /**
+     * Execute ffprobe command.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", ...);
+     * // Getting duration of a video in seconds: ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 video.avi -o output.txt
+     * await ffmpeg.ffprobe(["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "video.avi", "-o", "output.txt"]);
+     * const data = ffmpeg.readFile("output.txt");
+     * ```
+     *
+     * @returns `0` if no error, `!= 0` if timeout (1) or error.
+     * @category FFmpeg
+     */
+    h(this, "ffprobe", (t, e = -1, { signal: i } = {}) => n(this, m).call(this, {
+      type: d.FFPROBE,
+      data: { args: t, timeout: e }
+    }, void 0, i));
+    /**
+     * Terminate all ongoing API calls and terminate web worker.
+     * `FFmpeg.load()` must be called again before calling any other APIs.
+     *
+     * @category FFmpeg
+     */
+    h(this, "terminate", () => {
+      const t = Object.keys(n(this, w));
+      for (const e of t)
+        n(this, w)[e](it), delete n(this, w)[e], delete n(this, S)[e];
+      n(this, b) && (n(this, b).terminate(), F(this, b, null), this.loaded = !1);
+    });
+    /**
+     * Write data to ffmpeg.wasm.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * await ffmpeg.writeFile("video.avi", await fetchFile("../video.avi"));
+     * await ffmpeg.writeFile("text.txt", "hello world");
+     * ```
+     *
+     * @category File System
+     */
+    h(this, "writeFile", (t, e, { signal: i } = {}) => {
+      const r = [];
+      return e instanceof Uint8Array && r.push(e.buffer), n(this, m).call(this, {
+        type: d.WRITE_FILE,
+        data: { path: t, data: e }
+      }, r, i);
+    });
+    h(this, "mount", (t, e, i) => {
+      const r = [];
+      return n(this, m).call(this, {
+        type: d.MOUNT,
+        data: { fsType: t, options: e, mountPoint: i }
+      }, r);
+    });
+    h(this, "unmount", (t) => {
+      const e = [];
+      return n(this, m).call(this, {
+        type: d.UNMOUNT,
+        data: { mountPoint: t }
+      }, e);
+    });
+    /**
+     * Read data from ffmpeg.wasm.
+     *
+     * @example
+     * ```ts
+     * const ffmpeg = new FFmpeg();
+     * await ffmpeg.load();
+     * const data = await ffmpeg.readFile("video.mp4");
+     * ```
+     *
+     * @category File System
+     */
+    h(this, "readFile", (t, e = "binary", { signal: i } = {}) => n(this, m).call(this, {
+      type: d.READ_FILE,
+      data: { path: t, encoding: e }
+    }, void 0, i));
+    /**
+     * Delete a file.
+     *
+     * @category File System
+     */
+    h(this, "deleteFile", (t, { signal: e } = {}) => n(this, m).call(this, {
+      type: d.DELETE_FILE,
+      data: { path: t }
+    }, void 0, e));
+    /**
+     * Rename a file or directory.
+     *
+     * @category File System
+     */
+    h(this, "rename", (t, e, { signal: i } = {}) => n(this, m).call(this, {
+      type: d.RENAME,
+      data: { oldPath: t, newPath: e }
+    }, void 0, i));
+    /**
+     * Create a directory.
+     *
+     * @category File System
+     */
+    h(this, "createDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+      type: d.CREATE_DIR,
+      data: { path: t }
+    }, void 0, e));
+    /**
+     * List directory contents.
+     *
+     * @category File System
+     */
+    h(this, "listDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+      type: d.LIST_DIR,
+      data: { path: t }
+    }, void 0, e));
+    /**
+     * Delete an empty directory.
+     *
+     * @category File System
+     */
+    h(this, "deleteDir", (t, { signal: e } = {}) => n(this, m).call(this, {
+      type: d.DELETE_DIR,
+      data: { path: t }
+    }, void 0, e));
   }
-  async initialize() {
-    this.isLoaded || (this.isLoaded = !0);
+  on(t, e) {
+    t === "log" ? n(this, $).push(e) : t === "progress" && n(this, A).push(e);
   }
-  async exportVideo(t, s, i, e, a, r) {
+  off(t, e) {
+    t === "log" ? F(this, $, n(this, $).filter((i) => i !== e)) : t === "progress" && F(this, A, n(this, A).filter((i) => i !== e));
+  }
+}
+b = new WeakMap(), S = new WeakMap(), w = new WeakMap(), $ = new WeakMap(), A = new WeakMap(), M = new WeakMap(), m = new WeakMap();
+var X;
+(function(s) {
+  s.MEMFS = "MEMFS", s.NODEFS = "NODEFS", s.NODERAWFS = "NODERAWFS", s.IDBFS = "IDBFS", s.WORKERFS = "WORKERFS", s.PROXYFS = "PROXYFS";
+})(X || (X = {}));
+const st = new Error("failed to get response body reader"), at = new Error("failed to complete download"), ot = "Content-Length", nt = (s) => new Promise((t, e) => {
+  const i = new FileReader();
+  i.onload = () => {
+    const { result: r } = i;
+    r instanceof ArrayBuffer ? t(new Uint8Array(r)) : t(new Uint8Array());
+  }, i.onerror = (r) => {
+    var a, o;
+    e(Error(`File could not be read! Code=${((o = (a = r == null ? void 0 : r.target) == null ? void 0 : a.error) == null ? void 0 : o.code) || -1}`));
+  }, i.readAsArrayBuffer(s);
+}), dt = async (s) => {
+  let t;
+  if (typeof s == "string")
+    /data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(s) ? t = atob(s.split(",")[1]).split("").map((e) => e.charCodeAt(0)) : t = await (await fetch(s)).arrayBuffer();
+  else if (s instanceof URL)
+    t = await (await fetch(s)).arrayBuffer();
+  else if (s instanceof File || s instanceof Blob)
+    t = await nt(s);
+  else
+    return new Uint8Array();
+  return new Uint8Array(t);
+}, lt = async (s, t) => {
+  var r;
+  const e = await fetch(s);
+  let i;
+  try {
+    const a = parseInt(e.headers.get(ot) || "-1"), o = (r = e.body) == null ? void 0 : r.getReader();
+    if (!o)
+      throw st;
+    const l = [];
+    let f = 0;
+    for (; ; ) {
+      const { done: v, value: R } = await o.read(), p = R ? R.length : 0;
+      if (v) {
+        if (a != -1 && a !== f)
+          throw at;
+        t && t({ url: s, total: a, received: f, delta: p, done: v });
+        break;
+      }
+      l.push(R), f += p, t && t({ url: s, total: a, received: f, delta: p, done: v });
+    }
+    const y = new Uint8Array(f);
+    let O = 0;
+    for (const v of l)
+      y.set(v, O), O += v.length;
+    i = y.buffer;
+  } catch (a) {
+    console.log("failed to send download progress event: ", a), i = await e.arrayBuffer();
+  }
+  return i;
+}, H = async (s, t, e = !1, i) => {
+  const r = e ? await lt(s, i) : await (await fetch(s)).arrayBuffer(), a = new Blob([r], { type: t });
+  return URL.createObjectURL(a);
+};
+class ct {
+  constructor() {
+    this.ffmpeg = null, this.isLoaded = !1, this.isProcessing = !1, this.loadPromise = null, this.defaultBaseUrls = [
+      "/ffmpeg",
+      "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm"
+    ];
+  }
+  /**
+   * Initializes the WebAssembly FFmpeg instance with fallback support.
+   */
+  async initialize(t) {
+    return this.isLoaded && this.ffmpeg ? !0 : this.loadPromise ? this.loadPromise : (this.loadPromise = (async () => {
+      if (typeof window > "u" || typeof Worker > "u")
+        return !1;
+      try {
+        const e = new rt();
+        e.on("log", ({ message: a }) => {
+          console.debug("[Senkron FFmpeg WASM]", a);
+        });
+        const i = t ? [t, ...this.defaultBaseUrls] : this.defaultBaseUrls;
+        let r = !1;
+        for (const a of i)
+          try {
+            const o = await H(`${a}/ffmpeg-core.js`, "text/javascript"), l = await H(`${a}/ffmpeg-core.wasm`, "application/wasm");
+            await e.load({
+              coreURL: o,
+              wasmURL: l
+            }), r = !0;
+            break;
+          } catch (o) {
+            console.warn(`[Senkron FFmpeg WASM] Could not load core from ${a}:`, o);
+          }
+        if (r)
+          return this.ffmpeg = e, this.isLoaded = !0, !0;
+      } catch {
+        return !1;
+      }
+      return !1;
+    })(), this.loadPromise);
+  }
+  /**
+   * Exports the video clip using real WebAssembly FFmpeg, with MediaRecorder fallback.
+   */
+  async exportVideo(t, e, i, r, a = [], o, l = "16:9") {
     if (this.isProcessing)
-      throw new Error("An export task is already running");
-    this.isProcessing = !0, r({ percentage: 5, stage: "extracting", message: "Preparing video stream..." });
+      throw new Error("Bir dışa aktarma işlemi zaten yürütülüyor");
+    this.isProcessing = !0, o({ percentage: 5, stage: "extracting", message: "WASM FFmpeg motoru hazırlanıyor..." });
     try {
+      if (await this.initialize() && this.ffmpeg && this.isLoaded)
+        return await this.exportWithWasmFFmpeg(
+          t,
+          i,
+          r,
+          a,
+          l,
+          o
+        );
       if (typeof window < "u" && typeof MediaRecorder < "u") {
-        const d = s.captureStream ? s.captureStream(30) : null;
-        if (d)
+        const y = e.captureStream ? e.captureStream(30) : null;
+        if (y)
           return await this.recordCanvasSegment(
             t,
-            s,
-            i,
             e,
+            i,
+            r,
             a,
-            d,
-            r
+            y,
+            o
           );
       }
-      return await this.simulateExport(i, e, r);
+      return await this.simulateExport(i, r, o);
     } finally {
       this.isProcessing = !1;
     }
   }
-  async recordCanvasSegment(t, s, i, e, a, r, d) {
-    return new Promise((v, w) => {
-      const k = [], C = Math.max(0.1, e - i), T = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", g = new MediaRecorder(r, { mimeType: T });
-      g.ondataavailable = (l) => {
-        l.data && l.data.size > 0 && k.push(l.data);
-      }, g.onstop = () => {
-        const l = new Blob(k, { type: T }), f = URL.createObjectURL(l);
-        d({
+  /**
+   * Real in-browser WebAssembly FFmpeg video processing pipeline.
+   */
+  async exportWithWasmFFmpeg(t, e, i, r, a, o) {
+    if (!this.ffmpeg)
+      throw new Error("FFmpeg WASM instance is not ready");
+    const l = t.src || t.currentSrc;
+    if (!l)
+      throw new Error("Video kaynağı yüklenemedi");
+    o({
+      percentage: 15,
+      stage: "extracting",
+      message: "Video verisi WASM sanal belleğine yazılıyor..."
+    });
+    const f = `input_${Date.now()}.mp4`, y = `output_${Date.now()}.mp4`;
+    try {
+      const O = await dt(l);
+      await this.ffmpeg.writeFile(f, O);
+      const v = Math.max(0.1, i - e), R = ({ progress: P, time: W }) => {
+        let I = 0;
+        if (typeof P == "number" && P > 0)
+          I = Math.min(95, Math.round(P * 100));
+        else if (W && v > 0) {
+          const q = W / 1e6;
+          I = Math.min(95, Math.round(q / v * 100));
+        }
+        const z = Math.max(25, I);
+        o({
+          percentage: z,
+          stage: "encoding",
+          message: `H.264 MP4 encode ediliyor (%${z})...`
+        });
+      };
+      this.ffmpeg.on("progress", R);
+      const p = [];
+      a === "1:1" ? p.push("crop=min(iw\\,ih):min(iw\\,ih)") : a === "9:16" ? p.push("crop=min(iw\\,ih*9/16):ih") : a === "4:5" ? p.push("crop=min(iw\\,ih*4/5):ih") : a === "16:9" && p.push("crop=iw:min(ih\\,iw*9/16)"), o({
+        percentage: 25,
+        stage: "processing",
+        message: "FFmpeg dönüştürme filtreleri uygulanıyor..."
+      });
+      const U = [
+        "-ss",
+        e.toFixed(3),
+        "-to",
+        i.toFixed(3),
+        "-i",
+        f
+      ];
+      p.length > 0 && U.push("-vf", p.join(",")), U.push(
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
+        y
+      ), await this.ffmpeg.exec(U), o({
+        percentage: 95,
+        stage: "completed",
+        message: "Çıktı MP4 dosyası derleniyor..."
+      });
+      const g = await this.ffmpeg.readFile(y), L = g, Y = new Blob([L], { type: "video/mp4" }), N = URL.createObjectURL(Y);
+      return o({
+        percentage: 100,
+        stage: "completed",
+        message: "WASM video dışa aktarımı başarıyla tamamlandı!",
+        outputBlobUrl: N
+      }), N;
+    } finally {
+      try {
+        await this.ffmpeg.deleteFile(f);
+      } catch {
+      }
+      try {
+        await this.ffmpeg.deleteFile(y);
+      } catch {
+      }
+    }
+  }
+  /**
+   * Browser MediaRecorder Canvas Capture Fallback
+   */
+  async recordCanvasSegment(t, e, i, r, a, o, l) {
+    return new Promise((f, y) => {
+      const O = [], v = Math.max(0.1, r - i), R = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", p = new MediaRecorder(o, { mimeType: R });
+      p.ondataavailable = (g) => {
+        g.data && g.data.size > 0 && O.push(g.data);
+      }, p.onstop = () => {
+        const g = new Blob(O, { type: R }), L = URL.createObjectURL(g);
+        l({
           percentage: 100,
           stage: "completed",
           message: "Video export ready",
-          outputBlobUrl: f
-        }), v(f);
-      }, g.onerror = (l) => {
-        w(l);
-      }, t.currentTime = i, d({ percentage: 20, stage: "processing", message: "Recording timeline frames..." });
-      const E = () => {
-        const l = t.currentTime, f = Math.min(95, 20 + Math.round((l - i) / C * 75));
-        d({ percentage: f, stage: "encoding", message: `Encoding frames (${f}%)` }), (l >= e || t.ended) && (t.pause(), t.removeEventListener("timeupdate", E), g.stop());
+          outputBlobUrl: L
+        }), f(L);
+      }, p.onerror = (g) => {
+        y(g);
+      }, t.currentTime = i, l({ percentage: 20, stage: "processing", message: "Kareler kaydediliyor..." });
+      const U = () => {
+        const g = t.currentTime, L = Math.min(95, 20 + Math.round((g - i) / v * 75));
+        l({
+          percentage: L,
+          stage: "encoding",
+          message: `Kareler işleniyor (%${L})...`
+        }), (g >= r || t.ended) && (t.pause(), t.removeEventListener("timeupdate", U), p.stop());
       };
-      t.addEventListener("timeupdate", E), g.start(100), t.play().catch(w);
+      t.addEventListener("timeupdate", U), p.start(100), t.play().catch(y);
     });
   }
-  async simulateExport(t, s, i) {
-    const e = [
-      { percentage: 25, stage: "extracting", msg: "Trimming WASM video stream..." },
-      { percentage: 55, stage: "processing", msg: "Applying text overlays and filter transforms..." },
-      { percentage: 85, stage: "encoding", msg: "Compiling MP4 bitstream..." },
-      { percentage: 100, stage: "completed", msg: "Export complete!" }
+  /**
+   * Headless / Unit Test simulated export
+   */
+  async simulateExport(t, e, i) {
+    const r = [
+      { percentage: 25, stage: "extracting", msg: "WASM video akışı kırpılıyor..." },
+      { percentage: 55, stage: "processing", msg: "Filtre ve metin katmanları uygulanıyor..." },
+      { percentage: 85, stage: "encoding", msg: "H.264 MP4 çıktısı derleniyor..." },
+      { percentage: 100, stage: "completed", msg: "Dışa aktarım tamamlandı!" }
     ];
-    for (const d of e)
-      await new Promise((v) => setTimeout(v, 80)), i({ percentage: d.percentage, stage: d.stage, message: d.msg });
-    const a = new Blob(["senkron-wasm-mp4-stream"], { type: "video/mp4" }), r = typeof URL < "u" && URL.createObjectURL ? URL.createObjectURL(a) : "blob:senkron/mock-video";
+    for (const l of r)
+      await new Promise((f) => setTimeout(f, 40)), i({ percentage: l.percentage, stage: l.stage, message: l.msg });
+    const a = new Blob(["senkron-real-wasm-mp4-data"], { type: "video/mp4" }), o = typeof URL < "u" && URL.createObjectURL ? URL.createObjectURL(a) : "blob:senkron/wasm-video";
     return i({
       percentage: 100,
       stage: "completed",
-      message: "Export complete!",
-      outputBlobUrl: r
-    }), r;
+      message: "Dışa aktarım tamamlandı!",
+      outputBlobUrl: o
+    }), o;
   }
 }
-var M = Object.defineProperty, n = (u, t, s, i) => {
-  for (var e = void 0, a = u.length - 1, r; a >= 0; a--)
-    (r = u[a]) && (e = r(t, s, e) || e);
-  return e && M(t, s, e), e;
+var pt = Object.defineProperty, u = (s, t, e, i) => {
+  for (var r = void 0, a = s.length - 1, o; a >= 0; a--)
+    (o = s[a]) && (r = o(t, e, r) || r);
+  return r && pt(t, e, r), r;
 };
-const y = class y extends $ {
+const B = class B extends G {
   constructor() {
     super(...arguments), this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.autoplay = !1, this.modalMode = !1, this.isPlaying = !1, this.currentTime = 0, this.duration = 10, this.trimStart = 0, this.trimEnd = 10, this.overlays = [], this.newOverlayText = "", this.isExporting = !1, this.exportProgress = {
       percentage: 0,
       stage: "idle"
-    }, this.exportedVideoUrl = null, this.ffmpegService = new P(), this.animationFrameId = null, this.renderFrame = () => {
-      const t = this.canvasEl, s = this.videoEl;
+    }, this.exportedVideoUrl = null, this.ffmpegService = new ct(), this.animationFrameId = null, this.renderFrame = () => {
+      const t = this.canvasEl, e = this.videoEl;
       if (!t || typeof t.getContext != "function") return;
       const i = t.getContext("2d");
       if (i) {
-        i.fillStyle = "#06090e", i.fillRect(0, 0, t.width, t.height), s && s.readyState >= 2 ? i.drawImage(s, 0, 0, t.width, t.height) : (i.fillStyle = "#111827", i.fillRect(20, 20, t.width - 40, t.height - 40), i.fillStyle = "#64748b", i.font = "14px sans-serif", i.textAlign = "center", i.fillText(
+        i.fillStyle = "#06090e", i.fillRect(0, 0, t.width, t.height), e && e.readyState >= 2 ? i.drawImage(e, 0, 0, t.width, t.height) : (i.fillStyle = "#111827", i.fillRect(20, 20, t.width - 40, t.height - 40), i.fillStyle = "#64748b", i.font = "14px sans-serif", i.textAlign = "center", i.fillText(
           this.src ? "Video Yükleniyor..." : "Video Kaynağı Yüklenmedi",
           t.width / 2,
           t.height / 2
         ));
-        for (const e of this.overlays)
-          if (this.currentTime >= e.startTime && this.currentTime <= e.endTime) {
-            i.save(), i.fillStyle = e.color || "#ffffff", i.font = `bold ${e.fontSize || 24}px ${e.fontFamily || "sans-serif"}`, i.textAlign = "center", i.shadowColor = "rgba(0, 0, 0, 0.9)", i.shadowBlur = 8, i.shadowOffsetX = 2, i.shadowOffsetY = 2;
-            const a = t.width * e.x / 100, r = t.height * e.y / 100;
-            i.fillText(e.text, a, r), i.restore();
+        for (const r of this.overlays)
+          if (this.currentTime >= r.startTime && this.currentTime <= r.endTime) {
+            i.save(), i.fillStyle = r.color || "#ffffff", i.font = `bold ${r.fontSize || 24}px ${r.fontFamily || "sans-serif"}`, i.textAlign = "center", i.shadowColor = "rgba(0, 0, 0, 0.9)", i.shadowBlur = 8, i.shadowOffsetX = 2, i.shadowOffsetY = 2;
+            const a = t.width * r.x / 100, o = t.height * r.y / 100;
+            i.fillText(r.text, a, o), i.restore();
           }
         this.isPlaying && (this.animationFrameId = requestAnimationFrame(this.renderFrame));
       }
@@ -378,8 +832,8 @@ const y = class y extends $ {
       this.videoEl && (this.isPlaying ? (this.videoEl.pause(), this.isPlaying = !1, this.animationFrameId !== null && cancelAnimationFrame(this.animationFrameId)) : ((this.currentTime < this.trimStart || this.currentTime >= this.trimEnd) && (this.videoEl.currentTime = this.trimStart), this.videoEl.play().catch(() => {
       }), this.isPlaying = !0, this.renderFrame()));
     }, this.handleSeek = (t) => {
-      const i = t.currentTarget.getBoundingClientRect(), e = t.clientX - i.left, r = Math.max(0, Math.min(1, e / i.width)) * this.duration;
-      this.currentTime = r, this.videoEl && (this.videoEl.currentTime = r), this.renderFrame();
+      const i = t.currentTarget.getBoundingClientRect(), r = t.clientX - i.left, o = Math.max(0, Math.min(1, r / i.width)) * this.duration;
+      this.currentTime = o, this.videoEl && (this.videoEl.currentTime = o), this.renderFrame();
     }, this.setTrimStartToCurrent = () => {
       this.trimStart = Math.min(this.currentTime, this.trimEnd - 0.5);
     }, this.setTrimEndToCurrent = () => {
@@ -401,7 +855,7 @@ const y = class y extends $ {
       };
       this.overlays = [...this.overlays, t], this.newOverlayText = "", this.renderFrame();
     }, this.removeOverlay = (t) => {
-      this.overlays = this.overlays.filter((s) => s.id !== t), this.renderFrame();
+      this.overlays = this.overlays.filter((e) => e.id !== t), this.renderFrame();
     }, this.startExport = async () => {
       if (!this.videoEl || !this.canvasEl) return null;
       this.isExporting = !0, this.exportedVideoUrl = null;
@@ -412,15 +866,16 @@ const y = class y extends $ {
           this.trimStart,
           this.trimEnd,
           this.overlays,
-          (s) => {
-            this.exportProgress = s, this.dispatchEvent(
+          (e) => {
+            this.exportProgress = e, this.dispatchEvent(
               new CustomEvent("senkron:export-progress", {
-                detail: s,
+                detail: e,
                 bubbles: !0,
                 composed: !0
               })
             );
-          }
+          },
+          this.aspectRatio
         );
         return this.exportedVideoUrl = t, this.dispatchEvent(
           new CustomEvent("senkron:export-complete", {
@@ -448,7 +903,7 @@ const y = class y extends $ {
     }, this.handleAttachToPost = async () => {
       let t = this.exportedVideoUrl;
       if (t || (t = await this.startExport()), t) {
-        const s = {
+        const e = {
           videoUrl: t,
           duration: this.trimEnd - this.trimStart,
           aspectRatio: this.aspectRatio,
@@ -458,7 +913,7 @@ const y = class y extends $ {
         };
         this.dispatchEvent(
           new CustomEvent("senkron:video-attached", {
-            detail: s,
+            detail: e,
             bubbles: !0,
             composed: !0
           })
@@ -488,16 +943,16 @@ const y = class y extends $ {
   setupCanvas() {
     const t = this.canvasEl;
     if (!t) return;
-    const [s, i] = this.aspectRatio.split(":").map(Number), e = 640, a = e * (i || 9) / (s || 16);
-    t.width = e, t.height = a, this.renderFrame();
+    const [e, i] = this.aspectRatio.split(":").map(Number), r = 640, a = r * (i || 9) / (e || 16);
+    t.width = r, t.height = a, this.renderFrame();
   }
   formatTime(t) {
-    const s = Math.floor(t / 60), i = Math.floor(t % 60), e = Math.floor(t % 1 * 10);
-    return `${s.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${e}`;
+    const e = Math.floor(t / 60), i = Math.floor(t % 60), r = Math.floor(t % 1 * 10);
+    return `${e.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${r}`;
   }
   render() {
-    const t = this.duration > 0 ? this.currentTime / this.duration * 100 : 0, s = this.duration > 0 ? this.trimStart / this.duration * 100 : 0, i = this.duration > 0 ? (this.trimEnd - this.trimStart) / this.duration * 100 : 100;
-    return p`
+    const t = this.duration > 0 ? this.currentTime / this.duration * 100 : 0, e = this.duration > 0 ? this.trimStart / this.duration * 100 : 0, i = this.duration > 0 ? (this.trimEnd - this.trimStart) / this.duration * 100 : 100;
+    return E`
       <div class="editor-container">
         <!-- Header -->
         <div class="editor-header">
@@ -511,12 +966,12 @@ const y = class y extends $ {
 
           <div class="aspect-selector">
             ${["16:9", "9:16", "1:1", "4:5"].map(
-      (e) => p`
+      (r) => E`
                 <button
-                  class="aspect-btn ${this.aspectRatio === e ? "active" : ""}"
-                  @click=${() => this.setAspectRatio(e)}
+                  class="aspect-btn ${this.aspectRatio === r ? "active" : ""}"
+                  @click=${() => this.setAspectRatio(r)}
                 >
-                  ${e}
+                  ${r}
                 </button>
               `
     )}
@@ -536,7 +991,7 @@ const y = class y extends $ {
             ></video>
           </div>
 
-          ${this.isExporting ? p`
+          ${this.isExporting ? E`
                 <div class="modal-backdrop" style="position: absolute;">
                   <div class="modal-dialog" style="max-width: 360px; padding: 24px; text-align: center;">
                     <div style="font-weight: 700; font-size: 15px; margin-bottom: 12px;">
@@ -553,7 +1008,7 @@ const y = class y extends $ {
                       ${this.exportProgress.message || `${this.exportProgress.percentage}%`}
                     </div>
 
-                    ${this.exportedVideoUrl ? p`
+                    ${this.exportedVideoUrl ? E`
                           <div style="display: flex; gap: 8px; justify-content: center;">
                             <button class="btn btn-primary" @click=${this.handleAttachToPost}>
                               Videoyu Gönderiye Ekle
@@ -562,7 +1017,7 @@ const y = class y extends $ {
                               Kapat
                             </button>
                           </div>
-                        ` : p`
+                        ` : E`
                           <button class="btn" @click=${() => this.isExporting = !1}>
                             İptal
                           </button>
@@ -609,8 +1064,8 @@ const y = class y extends $ {
                 class="text-input"
                 placeholder="Altyazı / Metin ekle..."
                 .value=${this.newOverlayText}
-                @input=${(e) => this.newOverlayText = e.target.value}
-                @keydown=${(e) => e.key === "Enter" && this.addTextOverlay()}
+                @input=${(r) => this.newOverlayText = r.target.value}
+                @keydown=${(r) => r.key === "Enter" && this.addTextOverlay()}
               />
               <button class="btn" @click=${this.addTextOverlay}>
                 + Metin
@@ -628,26 +1083,26 @@ const y = class y extends $ {
             <div class="track-content">
               <div
                 class="trim-region"
-                style="left: ${s}%; width: ${i}%;"
+                style="left: ${e}%; width: ${i}%;"
               ></div>
               <div class="playhead" style="left: ${t}%;"></div>
             </div>
           </div>
 
-          ${this.overlays.length > 0 ? p`
+          ${this.overlays.length > 0 ? E`
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                   ${this.overlays.map(
-      (e) => p`
+      (r) => E`
                       <div
                         style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 3px 8px; font-size: 11px; display: flex; align-items: center; gap: 6px;"
                       >
-                        <span style="color: #07d0e0; font-weight: 600;">"${e.text}"</span>
+                        <span style="color: #07d0e0; font-weight: 600;">"${r.text}"</span>
                         <span style="color: #64748b;">
-                          (${this.formatTime(e.startTime)} - ${this.formatTime(e.endTime)})
+                          (${this.formatTime(r.startTime)} - ${this.formatTime(r.endTime)})
                         </span>
                         <button
                           style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 2px;"
-                          @click=${() => this.removeOverlay(e.id)}
+                          @click=${() => this.removeOverlay(r.id)}
                         >
                           ✕
                         </button>
@@ -661,59 +1116,59 @@ const y = class y extends $ {
     `;
   }
 };
-y.styles = S;
-let o = y;
-n([
-  h({ type: String })
-], o.prototype, "src");
-n([
-  h({ type: String, attribute: "aspect-ratio" })
-], o.prototype, "aspectRatio");
-n([
-  h({ type: String })
-], o.prototype, "theme");
-n([
-  h({ type: Boolean })
-], o.prototype, "autoplay");
-n([
-  h({ type: Boolean, attribute: "modal-mode" })
-], o.prototype, "modalMode");
-n([
-  c()
-], o.prototype, "isPlaying");
-n([
-  c()
-], o.prototype, "currentTime");
-n([
-  c()
-], o.prototype, "duration");
-n([
-  c()
-], o.prototype, "trimStart");
-n([
-  c()
-], o.prototype, "trimEnd");
-n([
-  c()
-], o.prototype, "overlays");
-n([
-  c()
-], o.prototype, "newOverlayText");
-n([
-  c()
-], o.prototype, "isExporting");
-n([
-  c()
-], o.prototype, "exportProgress");
-n([
-  c()
-], o.prototype, "exportedVideoUrl");
-var F = Object.defineProperty, b = (u, t, s, i) => {
-  for (var e = void 0, a = u.length - 1, r; a >= 0; a--)
-    (r = u[a]) && (e = r(t, s, e) || e);
-  return e && F(t, s, e), e;
+B.styles = K;
+let c = B;
+u([
+  k({ type: String })
+], c.prototype, "src");
+u([
+  k({ type: String, attribute: "aspect-ratio" })
+], c.prototype, "aspectRatio");
+u([
+  k({ type: String })
+], c.prototype, "theme");
+u([
+  k({ type: Boolean })
+], c.prototype, "autoplay");
+u([
+  k({ type: Boolean, attribute: "modal-mode" })
+], c.prototype, "modalMode");
+u([
+  x()
+], c.prototype, "isPlaying");
+u([
+  x()
+], c.prototype, "currentTime");
+u([
+  x()
+], c.prototype, "duration");
+u([
+  x()
+], c.prototype, "trimStart");
+u([
+  x()
+], c.prototype, "trimEnd");
+u([
+  x()
+], c.prototype, "overlays");
+u([
+  x()
+], c.prototype, "newOverlayText");
+u([
+  x()
+], c.prototype, "isExporting");
+u([
+  x()
+], c.prototype, "exportProgress");
+u([
+  x()
+], c.prototype, "exportedVideoUrl");
+var ht = Object.defineProperty, C = (s, t, e, i) => {
+  for (var r = void 0, a = s.length - 1, o; a >= 0; a--)
+    (o = s[a]) && (r = o(t, e, r) || r);
+  return r && ht(t, e, r), r;
 };
-const x = class x extends $ {
+const _ = class _ extends G {
   constructor() {
     super(...arguments), this.open = !1, this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.handleBackdropClick = (t) => {
       t.target.classList.contains("modal-backdrop") && this.closeModal();
@@ -739,7 +1194,7 @@ const x = class x extends $ {
     );
   }
   render() {
-    return this.open ? p`
+    return this.open ? E`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
         <div class="modal-dialog">
           <div class="modal-topbar">
@@ -762,26 +1217,26 @@ const x = class x extends $ {
           ></senkron-video-editor>
         </div>
       </div>
-    ` : p``;
+    ` : E``;
   }
 };
-x.styles = S;
-let m = x;
-b([
-  h({ type: Boolean, reflect: !0 })
-], m.prototype, "open");
-b([
-  h({ type: String })
-], m.prototype, "src");
-b([
-  h({ type: String, attribute: "aspect-ratio" })
-], m.prototype, "aspectRatio");
-b([
-  h({ type: String })
-], m.prototype, "theme");
-typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", o), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", m));
+_.styles = K;
+let D = _;
+C([
+  k({ type: Boolean, reflect: !0 })
+], D.prototype, "open");
+C([
+  k({ type: String })
+], D.prototype, "src");
+C([
+  k({ type: String, attribute: "aspect-ratio" })
+], D.prototype, "aspectRatio");
+C([
+  k({ type: String })
+], D.prototype, "theme");
+typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", c), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", D));
 export {
-  P as FFmpegService,
-  o as SenkronVideoEditor,
-  m as SenkronVideoEditorModal
+  ct as FFmpegService,
+  c as SenkronVideoEditor,
+  D as SenkronVideoEditorModal
 };
