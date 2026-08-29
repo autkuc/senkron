@@ -524,8 +524,17 @@ export class SenkronVideoEditor extends LitElement {
           ${this.isExporting
             ? html`
                 <div class="modal-backdrop" style="position: absolute;">
-                  <div class="modal-dialog" style="max-width: 380px; padding: 24px; text-align: center;">
-                    <div style="font-weight: 700; font-size: 15px; margin-bottom: 12px; color: #f1f5f9;">
+                  <div
+                    class="modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Video işleme durumu"
+                    style="max-width: 380px; padding: 24px; text-align: center;"
+                  >
+                    <div
+                      role=${this.exportProgress.stage === 'error' ? 'alert' : 'status'}
+                      style="font-weight: 700; font-size: 15px; margin-bottom: 12px; color: #f1f5f9;"
+                    >
                       ${this.exportProgress.stage === 'completed'
                         ? '🎉 Video Render Tamamlandı!'
                         : this.exportProgress.stage === 'error'
@@ -533,13 +542,20 @@ export class SenkronVideoEditor extends LitElement {
                         : '⚡ WASM FFmpeg ile İşleniyor...'}
                     </div>
 
-                    <div style="height: 6px; background: #1e293b; border-radius: 9999px; overflow: hidden; margin-bottom: 10px;">
+                    <div
+                      role="progressbar"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-valuenow=${Math.round(this.exportProgress.percentage)}
+                      aria-label="İşleme ilerlemesi"
+                      style="height: 6px; background: #1e293b; border-radius: 9999px; overflow: hidden; margin-bottom: 10px;"
+                    >
                       <div
                         style="height: 100%; width: ${this.exportProgress.percentage}%; background: linear-gradient(90deg, #07d0e0, #324bff); transition: width 0.2s ease;"
                       ></div>
                     </div>
 
-                    <div style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
+                    <div aria-live="polite" style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
                       ${this.exportProgress.message || `${this.exportProgress.percentage}%`}
                     </div>
 

@@ -29,6 +29,7 @@ export class SmartRouter {
       externalModelName: config?.externalModelName || process.env.EXTERNAL_LLM_MODEL || 'gpt-4o-mini',
       healthCheckIntervalMs: config?.healthCheckIntervalMs ?? 15000,
       forceRoute: config?.forceRoute || (process.env.FORCE_LLM_ROUTE as 'internal' | 'external' | undefined) || ('internal' as any),
+      allowSimulation: config?.allowSimulation ?? process.env.NODE_ENV !== 'production',
     };
   }
 
@@ -93,7 +94,13 @@ export class SmartRouter {
         return this.callExternal(messages, temperature, 'local_timeout_fallback', startTime, true);
       }
 
-      // If no external provider configured, fallback to simulation for test resilience
+      // If no external provider configured: simulation ONLY in dev/test.
+      // Production must fail loudly instead of serving fake AI output.
+      if (!this.config.allowSimulation) {
+        throw new Error(
+          'LLM_UNAVAILABLE: Yerel LLM çevrimdışı ve dış sağlayıcı anahtarı tanımlı değil; production modunda simülasyon kapalı.'
+        );
+      }
       const latencyMs = Date.now() - startTime;
       const simText = this.simulateFallbackResponse(messages);
       return {
@@ -105,12 +112,12 @@ export class SmartRouter {
         },
         modelUsed: `${this.config.localModelName}-simulated`,
         telemetry: {
-          routeUsed: 'internal',
-          routeReason: 'local_healthy',
+          routeUsed: 'simulated',
+          routeReason: 'simulation_no_router',
           latencyMs,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
-          fallbackTriggered: false,
+          fallbackTriggered: true,
         },
       };
     } finally {
@@ -219,20 +226,25 @@ export class SmartRouter {
         },
       };
     } catch (err) {
-      // If external also fails, generate deterministic fallback
+      // External also failed: production must NOT fabricate output.
+      if (!this.config.allowSimulation) {
+        throw new Error(
+          'LLM_UNAVAILABLE: Yerel ve dış LLM sağlayıcılarının ikisine de ulaşılamadı; production modunda simülasyon kapalı.'
+        );
+      }
       const latencyMs = Date.now() - startTime;
       const simText = this.simulateFallbackResponse(messages);
       return {
         rawText: simText,
         tokenUsage: {
-          promptTokens: 100,
-          completionTokens: 100,
-          totalTokens: 200,
+          promptTokens: Math.ceil(messages.map((m) => m.content).join(' ').length / 4),
+          completionTokens: Math.ceil(simText.length / 4),
+          totalTokens: Math.ceil((messages.map((m) => m.content).join(' ').length + simText.length) / 4),
         },
-        modelUsed: 'deterministic-fallback',
+        modelUsed: `${this.config.externalModelName}-simulated`,
         telemetry: {
-          routeUsed: 'external',
-          routeReason: reason,
+          routeUsed: 'simulated',
+          routeReason: 'simulation_no_router',
           latencyMs,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,

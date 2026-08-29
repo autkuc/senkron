@@ -1,7 +1,7 @@
-var v = Object.defineProperty;
-var x = (s, e, n) => e in s ? v(s, e, { enumerable: !0, configurable: !0, writable: !0, value: n }) : s[e] = n;
-var y = (s, e, n) => x(s, typeof e != "symbol" ? e + "" : e, n);
-const M = [
+var C = Object.defineProperty;
+var w = (l, e, a) => e in l ? C(l, e, { enumerable: !0, configurable: !0, writable: !0, value: a }) : l[e] = a;
+var y = (l, e, a) => w(l, typeof e != "symbol" ? e + "" : e, a);
+const A = [
   /ignore\s+(all\s+)?previous\s+instructions/i,
   /disregard\s+(all\s+)?prior\s+prompts/i,
   /you\s+are\s+now\s+a/i,
@@ -13,9 +13,9 @@ const M = [
   /\[system\]/i,
   /<<SYS>>/i
 ];
-function _(s) {
-  const e = s.trim();
-  return M.some((a) => a.test(e)) ? {
+function N(l) {
+  const e = l.trim();
+  return A.some((n) => n.test(e)) ? {
     passed: !1,
     flaggedCategories: ["prompt_injection"],
     reason: "İstem enjeksiyonu ve güvenlik kurallarını aşma girişimi tespit edildi.",
@@ -26,7 +26,7 @@ function _(s) {
     confidenceScore: 1
   };
 }
-const S = {
+const z = {
   hate_speech: [
     /ırkçılık/i,
     /nefret söylemi/i,
@@ -82,28 +82,28 @@ const S = {
   ],
   prompt_injection: []
 };
-function L(s) {
-  if (!s || s.trim().length === 0)
+function M(l) {
+  if (!l || l.trim().length === 0)
     return {
       passed: !1,
       flaggedCategories: ["spam"],
       reason: "Girdi metni boş olamaz.",
       confidenceScore: 1
     };
-  const e = _(s);
+  const e = N(l);
   if (!e.passed)
     return e;
-  const n = [];
-  for (const [a, t] of Object.entries(S))
-    for (const l of t)
-      if (l.test(s)) {
-        n.push(a);
+  const a = [];
+  for (const [n, t] of Object.entries(z))
+    for (const r of t)
+      if (r.test(l)) {
+        a.push(n);
         break;
       }
-  return n.length > 0 ? {
+  return a.length > 0 ? {
     passed: !1,
-    flaggedCategories: n,
-    reason: `Metin NSosyal Topluluk Kuralları'nı ihlal ediyor: [${n.join(", ")}]`,
+    flaggedCategories: a,
+    reason: `Metin NSosyal Topluluk Kuralları'nı ihlal ediyor: [${a.join(", ")}]`,
     confidenceScore: 0.95
   } : {
     passed: !0,
@@ -111,7 +111,7 @@ function L(s) {
     confidenceScore: 1
   };
 }
-const N = `Sen NSosyal sosyal ağ platformu için uzman bir yapay zeka içerik yazarısın.
+const Y = `Sen NSosyal sosyal ağ platformu için uzman bir yapay zeka içerik yazarısın.
 Görevlerin:
 1. Kullanıcının konusundan ilgi çekici, yüksek etkileşimli ve kusursuz Türkçe dil kurallarına uygun bir gönderi oluşturmak.
 2. Kesinlikle YALNIZCA akıcı, kurallı ve duru Türkçe yaz. Yabancı dildeki (İngilizce, Fransızca, Hintçe, Lehçe vb.) kelimeleri veya anlamsız karakterleri ASLA kullanma.
@@ -119,13 +119,13 @@ Görevlerin:
 4. İstenen tona (Viral, Kurumsal, Eğitici, Samimi, Yaratıcı) uygun üslup kullanmak.
 5. Gönderinin sonuna 3-4 ilgili Türkçe hashtag eklemek (örneğin #NSosyal #Teknoloji).
 6. Aşırı reklam dili kullanmamak, doğal ve topluluk odaklı yazmak.`;
-function w(s, e = "viral") {
-  return `Konu: ${s}
+function P(l, e = "viral") {
+  return `Konu: ${l}
 ${e === "viral" ? "🔥 Ton: Viral ve Yüksek Etkileşimli (Dikkat çekici açılış, merak uyandıran heyecanlı üslup)" : e === "professional" ? "💼 Ton: Kurumsal ve Resmi (Saygılı, profesyonel, sektörel liderlik vurgusu)" : e === "educational" ? "💡 Ton: Eğitici ve Bilgilendirici (Faydalı hap bilgi, öğretici ve açıklayıcı cümleler)" : e === "witty" ? "✨ Ton: Yaratıcı ve Nüktedan (Zekice yazılmış, esprili ve özgün)" : "☕ Ton: Samimi ve Doğal (Toplulukla sohbet havasında, sıcak üslup)"}
 
 Lütfen NSosyal gönderisini Türkçe olarak oluştur:`;
 }
-class C {
+class R {
   constructor(e) {
     y(this, "config");
     y(this, "activeLocalSlots", 0);
@@ -140,7 +140,8 @@ class C {
       externalApiKey: (e == null ? void 0 : e.externalApiKey) || process.env.EXTERNAL_LLM_API_KEY || process.env.OPENAI_API_KEY || "",
       externalModelName: (e == null ? void 0 : e.externalModelName) || process.env.EXTERNAL_LLM_MODEL || "gpt-4o-mini",
       healthCheckIntervalMs: (e == null ? void 0 : e.healthCheckIntervalMs) ?? 15e3,
-      forceRoute: (e == null ? void 0 : e.forceRoute) || process.env.FORCE_LLM_ROUTE || "internal"
+      forceRoute: (e == null ? void 0 : e.forceRoute) || process.env.FORCE_LLM_ROUTE || "internal",
+      allowSimulation: (e == null ? void 0 : e.allowSimulation) ?? process.env.NODE_ENV !== "production"
     };
   }
   getActiveLocalSlots() {
@@ -152,19 +153,19 @@ class C {
   isLocalAvailable() {
     return this.isLocalHealthy && this.activeLocalSlots < this.config.maxLocalConcurrency;
   }
-  async executeChat(e, n = 0.7) {
-    const a = Date.now();
+  async executeChat(e, a = 0.7) {
+    const n = Date.now();
     if (this.config.forceRoute === "external")
-      return this.callExternal(e, n, "forced_mode", a, !1);
+      return this.callExternal(e, a, "forced_mode", n, !1);
     if (this.activeLocalSlots >= this.config.maxLocalConcurrency && this.config.externalApiKey)
-      return this.callExternal(e, n, "local_concurrency_saturated", a, !1);
+      return this.callExternal(e, a, "local_concurrency_saturated", n, !1);
     if (!this.isLocalHealthy && this.config.externalApiKey)
-      return this.callExternal(e, n, "local_offline", a, !1);
+      return this.callExternal(e, a, "local_offline", n, !1);
     try {
       this.activeLocalSlots++;
-      const t = await this.callLocalWithTimeout(e, n);
+      const t = await this.callLocalWithTimeout(e, a);
       this.isLocalHealthy = !0;
-      const l = Date.now() - a;
+      const r = Date.now() - n;
       return {
         rawText: t.text,
         tokenUsage: t.usage,
@@ -172,7 +173,7 @@ class C {
         telemetry: {
           routeUsed: "internal",
           routeReason: "local_healthy",
-          latencyMs: l,
+          latencyMs: r,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
           fallbackTriggered: !1
@@ -180,65 +181,69 @@ class C {
       };
     } catch (t) {
       if (console.error("[SmartRouter Local Error]:", t), this.isLocalHealthy = !1, this.config.externalApiKey)
-        return this.callExternal(e, n, "local_timeout_fallback", a, !0);
-      const l = Date.now() - a, r = this.simulateFallbackResponse(e);
+        return this.callExternal(e, a, "local_timeout_fallback", n, !0);
+      if (!this.config.allowSimulation)
+        throw new Error(
+          "LLM_UNAVAILABLE: Yerel LLM çevrimdışı ve dış sağlayıcı anahtarı tanımlı değil; production modunda simülasyon kapalı."
+        );
+      const r = Date.now() - n, o = this.simulateFallbackResponse(e);
       return {
-        rawText: r,
+        rawText: o,
         tokenUsage: {
           promptTokens: Math.ceil(e.map((i) => i.content).join(" ").length / 4),
-          completionTokens: Math.ceil(r.length / 4),
-          totalTokens: Math.ceil((e.map((i) => i.content).join(" ").length + r.length) / 4)
+          completionTokens: Math.ceil(o.length / 4),
+          totalTokens: Math.ceil((e.map((i) => i.content).join(" ").length + o.length) / 4)
         },
         modelUsed: `${this.config.localModelName}-simulated`,
         telemetry: {
-          routeUsed: "internal",
-          routeReason: "local_healthy",
-          latencyMs: l,
+          routeUsed: "simulated",
+          routeReason: "simulation_no_router",
+          latencyMs: r,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
-          fallbackTriggered: !1
+          fallbackTriggered: !0
         }
       };
     } finally {
       this.activeLocalSlots = Math.max(0, this.activeLocalSlots - 1);
     }
   }
-  async callLocalWithTimeout(e, n) {
-    var l, r, i, u, m;
-    const a = new AbortController(), t = setTimeout(() => a.abort(), this.config.localTimeoutMs);
+  async callLocalWithTimeout(e, a) {
+    var r, o, i, m, h;
+    const n = new AbortController(), t = setTimeout(() => n.abort(), this.config.localTimeoutMs);
     try {
-      const o = this.config.localBaseUrl.replace(/\/+$/, ""), c = o.endsWith("/chat/completions") ? o : `${o}/chat/completions`;
-      console.log(`[SmartRouter] Calling local LLM endpoint: ${c}`);
-      const h = await fetch(c, {
+      const c = this.config.localBaseUrl.replace(/\/+$/, ""), u = c.endsWith("/chat/completions") ? c : `${c}/chat/completions`;
+      console.log(`[SmartRouter] Calling local LLM endpoint: ${u}`);
+      const s = await fetch(u, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: a.signal,
+        signal: n.signal,
         body: JSON.stringify({
           model: this.config.localModelName,
           messages: e,
-          temperature: n,
+          temperature: a,
           max_tokens: 600
         })
       });
-      if (!h.ok)
-        throw new Error(`Local inference returned status ${h.status}`);
-      const d = await h.json(), k = ((i = (r = (l = d.choices) == null ? void 0 : l[0]) == null ? void 0 : r.message) == null ? void 0 : i.content) || "", p = ((u = d.usage) == null ? void 0 : u.prompt_tokens) || Math.ceil(e.map((b) => b.content).join(" ").length / 4), g = ((m = d.usage) == null ? void 0 : m.completion_tokens) || Math.ceil(k.length / 4);
+      if (!s.ok)
+        throw new Error(`Local inference returned status ${s.status}`);
+      const d = await s.json(), p = ((i = (o = (r = d.choices) == null ? void 0 : r[0]) == null ? void 0 : o.message) == null ? void 0 : i.content) || "", k = ((m = d.usage) == null ? void 0 : m.prompt_tokens) || Math.ceil(e.map((b) => b.content).join(" ").length / 4), g = ((h = d.usage) == null ? void 0 : h.completion_tokens) || Math.ceil(p.length / 4);
       return {
-        text: k,
+        text: p,
         usage: {
-          promptTokens: p,
+          promptTokens: k,
           completionTokens: g,
-          totalTokens: p + g
+          totalTokens: k + g
         }
       };
     } finally {
       clearTimeout(t);
     }
   }
-  async callExternal(e, n, a, t, l) {
-    var r, i, u, m, o;
+  async callExternal(e, a, n, t, r) {
+    var o, i, m, h, c;
     try {
-      const c = this.config.externalBaseUrl.replace(/\/+$/, ""), h = c.endsWith("/chat/completions") ? c : `${c}/chat/completions`, d = await fetch(h, {
+      const u = this.config.externalBaseUrl.replace(/\/+$/, ""), s = u.endsWith("/chat/completions") ? u : `${u}/chat/completions`, d = await fetch(s, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -247,15 +252,15 @@ class C {
         body: JSON.stringify({
           model: this.config.externalModelName,
           messages: e,
-          temperature: n,
+          temperature: a,
           max_tokens: 600
         })
       });
       if (!d.ok)
         throw new Error(`External API returned status ${d.status}`);
-      const k = await d.json(), p = ((u = (i = (r = k.choices) == null ? void 0 : r[0]) == null ? void 0 : i.message) == null ? void 0 : u.content) || "", g = ((m = k.usage) == null ? void 0 : m.prompt_tokens) || Math.ceil(e.map((f) => f.content).join(" ").length / 4), b = ((o = k.usage) == null ? void 0 : o.completion_tokens) || Math.ceil(p.length / 4), T = Date.now() - t;
+      const p = await d.json(), k = ((m = (i = (o = p.choices) == null ? void 0 : o[0]) == null ? void 0 : i.message) == null ? void 0 : m.content) || "", g = ((h = p.usage) == null ? void 0 : h.prompt_tokens) || Math.ceil(e.map((E) => E.content).join(" ").length / 4), b = ((c = p.usage) == null ? void 0 : c.completion_tokens) || Math.ceil(k.length / 4), x = Date.now() - t;
       return {
-        rawText: p,
+        rawText: k,
         tokenUsage: {
           promptTokens: g,
           completionTokens: b,
@@ -264,27 +269,31 @@ class C {
         modelUsed: this.config.externalModelName,
         telemetry: {
           routeUsed: "external",
-          routeReason: a,
-          latencyMs: T,
+          routeReason: n,
+          latencyMs: x,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
-          fallbackTriggered: l
+          fallbackTriggered: r
         }
       };
     } catch {
-      const h = Date.now() - t;
+      if (!this.config.allowSimulation)
+        throw new Error(
+          "LLM_UNAVAILABLE: Yerel ve dış LLM sağlayıcılarının ikisine de ulaşılamadı; production modunda simülasyon kapalı."
+        );
+      const s = Date.now() - t, d = this.simulateFallbackResponse(e);
       return {
-        rawText: this.simulateFallbackResponse(e),
+        rawText: d,
         tokenUsage: {
-          promptTokens: 100,
-          completionTokens: 100,
-          totalTokens: 200
+          promptTokens: Math.ceil(e.map((p) => p.content).join(" ").length / 4),
+          completionTokens: Math.ceil(d.length / 4),
+          totalTokens: Math.ceil((e.map((p) => p.content).join(" ").length + d.length) / 4)
         },
-        modelUsed: "deterministic-fallback",
+        modelUsed: `${this.config.externalModelName}-simulated`,
         telemetry: {
-          routeUsed: "external",
-          routeReason: a,
-          latencyMs: h,
+          routeUsed: "simulated",
+          routeReason: "simulation_no_router",
+          latencyMs: s,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
           fallbackTriggered: !0
@@ -293,37 +302,124 @@ class C {
     }
   }
   simulateFallbackResponse(e) {
-    var a;
+    var n;
     return `🔥 Önemli Gelişme:
 
-${((a = e.find((t) => t.role === "user")) == null ? void 0 : a.content) || ""}
+${((n = e.find((t) => t.role === "user")) == null ? void 0 : n.content) || ""}
 
 NSosyal topluluğuna özel olarak hazırlanan bu gönderi, etkileşimi artırmak için tasarlandı. Siz de görüşlerinizi yorumlarda belirtin! 🚀
 
 #NSosyal #Teknoloji #YapayZeka`;
   }
 }
-class E {
-  constructor(e) {
-    this.router = e;
+const L = {
+  relevance: 0.3,
+  languageQuality: 0.2,
+  novelty: 0.15,
+  lengthFit: 0.15,
+  safety: 0.2
+}, S = 500, v = 400, _ = (l) => Math.max(0, Math.min(1, l)), T = (l) => l.toLowerCase().split(/[^\p{L}\p{N}#+]+/u).filter((e) => e.length >= 3);
+function U(l, e) {
+  const a = Array.from(new Set(T(l)));
+  if (a.length === 0) return 0.5;
+  const n = Array.from(new Set(T(e)));
+  let t = 0;
+  for (const r of a) {
+    const o = r.slice(0, Math.min(5, r.length));
+    n.some((i) => i === r || i.startsWith(o) || r.startsWith(i.slice(0, Math.min(5, i.length)))) && t++;
   }
-  async generateCandidates(e, n = "viral", a = 3, t) {
-    const l = this.buildPromptMessages(e, n);
-    let r = "", i, u;
+  return _(t / a.length);
+}
+function O(l) {
+  const e = l.split(/\s+/).filter(Boolean);
+  if (e.length === 0) return 0;
+  const a = e.filter(
+    (t) => t.length > 3 && /[a-zçğıöşü]/.test(t) && /[A-ZÇĞİÖŞÜ]/.test(t.slice(1))
+  ).length, n = e.filter(
+    (t) => /\b(the|and|with|for|our|your|this|that|new|feature|update)\b/i.test(t)
+  ).length;
+  return _(1 - (a + n) / Math.max(3, e.length * 0.2));
+}
+function $(l, e) {
+  const a = new Set(T(l));
+  if (e.length === 0 || a.size === 0) return 0.5;
+  let n = 0;
+  for (const t of e) {
+    const r = new Set(T(t));
+    let o = 0;
+    for (const m of a) r.has(m) && o++;
+    const i = (/* @__PURE__ */ new Set([...a, ...r])).size;
+    n = Math.max(n, i > 0 ? o / i : 0);
+  }
+  return _(1 - n);
+}
+function I(l) {
+  return l <= v ? 1 : l <= S ? 1 - 0.4 * ((l - v) / (S - v)) : 0;
+}
+function D(l) {
+  return M(l).passed ? 1 : 0;
+}
+function B(l, e, a) {
+  const n = a.filter((r) => r !== l.content), t = {
+    relevance: f(U(e, l.content)),
+    languageQuality: f(O(l.content)),
+    novelty: f($(l.content, n)),
+    lengthFit: f(I(l.characterCount)),
+    safety: D(l.content),
+    total: 0
+  };
+  return t.total = f(
+    t.relevance * L.relevance + t.languageQuality * L.languageQuality + t.novelty * L.novelty + t.lengthFit * L.lengthFit + t.safety * L.safety
+  ), t;
+}
+function K(l, e) {
+  const a = l.map((o) => o.content), n = l.map((o) => ({ c: o, s: B(o, e, a) }));
+  let t = 0;
+  return n.forEach((o, i) => {
+    o.c.scores = o.s, o.c.viralityScore = Math.round(o.s.total * 100), o.c.entropyScore = Math.round(o.s.novelty * 100), o.s.total > n[t].s.total && (t = i);
+  }), { ranked: [...n].sort((o, i) => i.s.total - o.s.total).map((o) => o.c), selectedIndex: t };
+}
+function F(l, e = S) {
+  if (l.length <= e) return l;
+  const a = l.slice(0, e - 1), n = a.lastIndexOf(" "), t = n > e * 0.6 ? n : e - 1;
+  return a.slice(0, t).trimEnd() + "…";
+}
+function f(l) {
+  return Math.round(l * 1e3) / 1e3;
+}
+class j {
+  constructor(e, a) {
+    this.router = e, this.options = a;
+  }
+  allowSimulation() {
+    var e;
+    return ((e = this.options) == null ? void 0 : e.allowSimulation) ?? process.env.NODE_ENV !== "production";
+  }
+  async generateCandidates(e, a = "viral", n = 3, t) {
+    const r = this.buildPromptMessages(e, a);
+    let o = "", i, m;
     if (t)
-      r = (await t(l)).text;
+      o = (await t(r)).text;
     else if (this.router) {
-      const o = await this.router.executeChat(l, 0.5);
-      r = o.rawText, i = o.telemetry, u = o.modelUsed;
+      const s = await this.router.executeChat(r, 0.5);
+      o = s.rawText, i = s.telemetry, m = s.modelUsed;
     }
+    if (!(o.trim().length > 0) && !this.allowSimulation())
+      throw new Error(
+        "LLM_UNAVAILABLE: Yerel veya dış LLM sağlayıcısına ulaşılamadı ve production modunda simülasyon kapalı. Sahte çıktı üretilmez."
+      );
+    const c = this.parseCandidatesFromLLM(o, e, a, n);
+    for (const s of c)
+      s.content = F(s.content), s.characterCount = s.content.length;
+    const { selectedIndex: u } = K(c, e);
     return {
-      candidates: this.parseCandidatesFromLLM(r, e, n, a),
-      selectedIndex: 0,
+      candidates: c,
+      selectedIndex: u,
       telemetry: i,
-      rawModel: u
+      rawModel: m
     };
   }
-  buildPromptMessages(e, n) {
+  buildPromptMessages(e, a) {
     return [
       {
         role: "system",
@@ -339,55 +435,55 @@ Kurallar:
       {
         role: "user",
         content: `Konu: ${e}
-Ton: ${n}
+Ton: ${a}
 Lütfen NSosyal gönderisini oluştur.`
       }
     ];
   }
-  parseCandidatesFromLLM(e, n, a, t) {
-    const l = [], r = e.trim() || `NSosyal üzerinde ${n} hakkında harika gelişmeler yaşanıyor. Detayları keşfetmek için takipte kalın!`, i = this.extractHashtags(r, n), u = this.cleanTurkishText(this.stripTrailingHashtags(r)), m = u.split(`
-`).map((c) => c.trim()).filter(Boolean);
-    let o = m[0];
-    if ((!o || o.includes("Önemli Gelişme") || m.length <= 1) && (o = this.getToneHook(n, a, 0)), l.push({
+  parseCandidatesFromLLM(e, a, n, t) {
+    const r = [], o = e.trim() || `NSosyal üzerinde ${a} hakkında harika gelişmeler yaşanıyor. Detayları keşfetmek için takipte kalın!`, i = this.extractHashtags(o, a), m = this.cleanTurkishText(this.stripTrailingHashtags(o)), h = m.split(`
+`).map((u) => u.trim()).filter(Boolean);
+    let c = h[0];
+    if ((!c || c.includes("Önemli Gelişme") || h.length <= 1) && (c = this.getToneHook(a, n, 0)), r.push({
       id: `cand_${Date.now()}_0`,
-      hook: o,
-      content: u,
+      hook: c,
+      content: m,
       hashtags: i,
-      characterCount: u.length,
+      characterCount: m.length,
       viralityScore: 92,
       entropyScore: 94
     }), t > 1) {
-      const c = m.slice(1).join(`
+      const u = h.slice(1).join(`
 
-`) || u, h = this.getToneHook(n, a, 1), d = this.cleanTurkishText(`${h}
+`) || m, s = this.getToneHook(a, n, 1), d = this.cleanTurkishText(`${s}
 
-${c}`.trim());
-      l.push({
+${u}`.trim());
+      r.push({
         id: `cand_${Date.now()}_1`,
-        hook: h,
+        hook: s,
         content: d,
         hashtags: i,
         characterCount: d.length,
         viralityScore: 88,
         entropyScore: 90
       });
-      const k = this.getToneHook(n, a, 2), p = this.cleanTurkishText(`${k}
+      const p = this.getToneHook(a, n, 2), k = this.cleanTurkishText(`${p}
 
-${c}`.trim());
-      l.push({
+${u}`.trim());
+      r.push({
         id: `cand_${Date.now()}_2`,
-        hook: k,
-        content: p,
+        hook: p,
+        content: k,
         hashtags: i,
-        characterCount: p.length,
+        characterCount: k.length,
         viralityScore: 84,
         entropyScore: 87
       });
     }
-    return l.slice(0, t);
+    return r.slice(0, t);
   }
   cleanTurkishText(e) {
-    const n = [
+    const a = [
       [/\bigual\b/gi, "aynı"],
       [/\bclean\b/gi, "temiz"],
       [/\bkeepers\b/gi, "araçlar"],
@@ -415,66 +511,66 @@ ${c}`.trim());
       [/\bdeil\b/gi, "değil"],
       [/\bpersonele\b/gi, "çalışanlara"]
     ];
-    let a = e.replace(/[\u0900-\u097F\u0400-\u04FF\u4E00-\u9FFF\u0100-\u0111\u0114-\u011F\u0122-\u012F\u0132-\u0137\u013C-\u014B\u0150-\u015D\u0160-\u016F\u0172-\u017D]/g, "");
-    for (const [t, l] of n)
-      a = a.replace(t, l);
-    return a = a.replace(/\b([a-zA-ZçğıöşüÇĞİÖŞÜ]+)\b/g, (t) => t.length > 2 && /[a-zçğıöşü]/.test(t) && /[A-ZÇĞİÖŞÜ]/.test(t.slice(1)) ? t.toLowerCase() : t), a = a.replace(/\b(\w+)ır\b/g, "$1dır"), a.replace(/ +/g, " ").trim();
+    let n = e.replace(/[\u0900-\u097F\u0400-\u04FF\u4E00-\u9FFF\u0100-\u0111\u0114-\u011F\u0122-\u012F\u0132-\u0137\u013C-\u014B\u0150-\u015D\u0160-\u016F\u0172-\u017D]/g, "");
+    for (const [t, r] of a)
+      n = n.replace(t, r);
+    return n = n.replace(/\b([a-zA-ZçğıöşüÇĞİÖŞÜ]+)\b/g, (t) => t.length > 2 && /[a-zçğıöşü]/.test(t) && /[A-ZÇĞİÖŞÜ]/.test(t.slice(1)) ? t.toLowerCase() : t), n = n.replace(/\b(\w+)ır\b/g, "$1dır"), n.replace(/ +/g, " ").trim();
   }
   stripTrailingHashtags(e) {
-    return e.replace(/(?:\r?\n\s*)*(?:#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+(?:\s+#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+)*\s*)+$/g, "").replace(/#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+/g, (n, a, t) => a >= t.length - 80 && !t.slice(a).includes(`
+    return e.replace(/(?:\r?\n\s*)*(?:#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+(?:\s+#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+)*\s*)+$/g, "").replace(/#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+/g, (a, n, t) => n >= t.length - 80 && !t.slice(n).includes(`
 
-`) ? "" : n).trim();
+`) ? "" : a).trim();
   }
-  getToneHook(e, n, a) {
+  getToneHook(e, a, n) {
     const t = e.trim().replace(/[.?]+$/, "");
-    if (n === "professional") {
-      const r = [
+    if (a === "professional") {
+      const o = [
         `💼 Sektörel Analiz: ${t}`,
         `📈 Operasyonel Standart: ${t}`,
         `🌐 Kurumsal Vizyon: ${t}`
       ];
-      return r[a % r.length];
+      return o[n % o.length];
     }
-    if (n === "educational") {
-      const r = [
+    if (a === "educational") {
+      const o = [
         `💡 60 Saniyede Öğrenin: ${t}`,
         `📌 ${t} Rehberi: En sık yapılan 3 hata`,
         `🧠 Temel Kavramlar: ${t}`
       ];
-      return r[a % r.length];
+      return o[n % o.length];
     }
-    if (n === "witty") {
-      const r = [
+    if (a === "witty") {
+      const o = [
         `✨ ${t} hakkında bilmeniz gerekenler:`,
         `☕ Kahveler hazırsa konuşalım: ${t}`,
         `👀 ${t} konusu:`
       ];
-      return r[a % r.length];
+      return o[n % o.length];
     }
-    if (n === "casual") {
-      const r = [
+    if (a === "casual") {
+      const o = [
         `👋 Selamlar! Bugün gündemimizde: ${t}`,
         `💬 ${t} hakkında ne düşünüyorsunuz?`,
         `🙌 Küçük bir not: ${t}`
       ];
-      return r[a % r.length];
+      return o[n % o.length];
     }
-    const l = [
+    const r = [
       `🔥 "${t}" hakkında bilmeniz gereken o gerçek:`,
       `🚀 2026'da öne çıkan başlık: ${t}!`,
       `⚡ ${t} ile ilgili 3 önemli detay:`
     ];
-    return l[a % l.length];
+    return r[n % r.length];
   }
-  extractHashtags(e, n) {
-    const a = e.match(/#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+/g);
-    if (a && a.length > 0)
-      return Array.from(new Set(a)).slice(0, 4);
-    const t = ["#NSosyal"], l = n.toLowerCase();
-    return (l.includes("yapay zeka") || l.includes("ai")) && t.push("#YapayZeka"), (l.includes("yazılım") || l.includes("kod")) && t.push("#Yazılım"), (l.includes("video") || l.includes("film")) && t.push("#Video"), t.length < 3 && t.push("#Teknoloji", "#Gündem"), Array.from(new Set(t)).slice(0, 4);
+  extractHashtags(e, a) {
+    const n = e.match(/#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+/g);
+    if (n && n.length > 0)
+      return Array.from(new Set(n)).slice(0, 4);
+    const t = ["#NSosyal"], r = a.toLowerCase();
+    return (r.includes("yapay zeka") || r.includes("ai")) && t.push("#YapayZeka"), (r.includes("yazılım") || r.includes("kod")) && t.push("#Yazılım"), (r.includes("video") || r.includes("film")) && t.push("#Video"), t.length < 3 && t.push("#Teknoloji", "#Gündem"), Array.from(new Set(t)).slice(0, 4);
   }
 }
-class z {
+class G {
   constructor(e) {
     y(this, "config");
     y(this, "router");
@@ -487,7 +583,7 @@ class z {
       maxLocalConcurrency: (e == null ? void 0 : e.maxLocalConcurrency) ?? Number(process.env.MAX_LOCAL_CONCURRENCY || 2),
       localTimeoutMs: (e == null ? void 0 : e.localTimeoutMs) ?? Number(process.env.LOCAL_TIMEOUT_MS || 5e3),
       ...e
-    }, this.router = new C({
+    }, this.router = new R({
       localBaseUrl: this.config.baseUrl,
       localModelName: this.config.modelName,
       maxLocalConcurrency: this.config.maxLocalConcurrency,
@@ -495,8 +591,11 @@ class z {
       externalBaseUrl: this.config.externalBaseUrl || process.env.EXTERNAL_LLM_BASE_URL || "https://api.openai.com/v1",
       externalApiKey: this.config.apiKey || this.config.externalApiKey || process.env.EXTERNAL_LLM_API_KEY,
       externalModelName: this.config.externalModelName || process.env.EXTERNAL_LLM_MODEL || "gpt-4o-mini",
-      forceRoute: this.config.forceRoute || (this.config.type === "external" ? "external" : void 0)
-    }), this.pipeline = new E(this.router);
+      forceRoute: this.config.forceRoute || (this.config.type === "external" ? "external" : void 0),
+      allowSimulation: (e == null ? void 0 : e.allowSimulation) ?? process.env.NODE_ENV !== "production"
+    }), this.pipeline = new j(this.router, {
+      allowSimulation: (e == null ? void 0 : e.allowSimulation) ?? process.env.NODE_ENV !== "production"
+    });
   }
   getRouter() {
     return this.router;
@@ -504,43 +603,43 @@ class z {
   async generatePost(e) {
     if (e.isGuest || e.userId === "guest" || !e.userId)
       throw new Error("UNAUTHORIZED_GUEST: Misafir kullanıcıların gönderi üretme izni yoktur. Lütfen giriş yapın.");
-    const n = L(e.topic);
-    if (!n.passed)
-      throw new Error(`CONTENT_MODERATION_BLOCKED: ${n.reason}`);
-    const a = e.tone || "viral", t = e.candidateCount || 3, l = await this.pipeline.generateCandidates(e.topic, a, t), r = l.candidates, i = r[l.selectedIndex] || r[0];
-    if (!L(i.content).passed)
+    const a = M(e.topic);
+    if (!a.passed)
+      throw new Error(`CONTENT_MODERATION_BLOCKED: ${a.reason}`);
+    const n = e.tone || "viral", t = e.candidateCount || 3, r = await this.pipeline.generateCandidates(e.topic, n, t), o = r.candidates, i = o[r.selectedIndex] || o[0];
+    if (!M(i.content).passed)
       throw new Error("OUTPUT_MODERATION_BLOCKED: Üretilen içerik güvenlik standartlarına uymadığından engellendi.");
-    const m = i.content.trim(), o = Math.ceil(e.topic.length / 4) + 50, c = Math.ceil(m.length / 4), h = l.telemetry || {
-      routeUsed: "internal",
-      routeReason: "local_healthy",
-      latencyMs: 120,
+    const h = i.content.trim(), c = Math.ceil(e.topic.length / 4) + 50, u = Math.ceil(h.length / 4), s = r.telemetry || {
+      routeUsed: "simulated",
+      routeReason: "simulation_no_router",
+      latencyMs: 0,
       activeLocalSlots: 0,
       maxLocalConcurrency: this.config.maxLocalConcurrency || 2,
-      fallbackTriggered: !1
+      fallbackTriggered: !0
     };
     return {
-      content: m,
+      content: h,
       hashtags: i.hashtags,
-      characterCount: m.length,
+      characterCount: h.length,
       maxCharacters: 500,
-      modelUsed: l.rawModel || this.config.modelName || "senkron-turkish-llama3.2:3b",
+      modelUsed: r.rawModel || this.config.modelName || "senkron-turkish-llama3.2:3b",
       tokenUsage: {
-        promptTokens: o,
-        completionTokens: c,
-        totalTokens: o + c
+        promptTokens: c,
+        completionTokens: u,
+        totalTokens: c + u
       },
-      candidates: r,
-      selectedCandidateIndex: l.selectedIndex,
-      routingTelemetry: h
+      candidates: o,
+      selectedCandidateIndex: r.selectedIndex,
+      routingTelemetry: s
     };
   }
 }
 export {
-  z as LLMGateway,
-  N as SYSTEM_PROMPT,
-  C as SmartRouter,
-  E as TwoStageGenerator,
-  w as buildPrompt,
-  _ as checkPromptInjection,
-  L as moderateContent
+  G as LLMGateway,
+  Y as SYSTEM_PROMPT,
+  R as SmartRouter,
+  j as TwoStageGenerator,
+  P as buildPrompt,
+  N as checkPromptInjection,
+  M as moderateContent
 };

@@ -4,9 +4,17 @@ import {
   PostCandidate,
   TwoStageResult,
 } from '../types';
+import { enforceCharacterLimit, rankCandidates } from './scoring';
 
 export class TwoStageGenerator {
-  constructor(private router?: SmartRouter) {}
+  constructor(
+    private router?: SmartRouter,
+    private options?: { allowSimulation?: boolean }
+  ) {}
+
+  private allowSimulation(): boolean {
+    return this.options?.allowSimulation ?? process.env.NODE_ENV !== 'production';
+  }
 
   public async generateCandidates(
     topic: string,
@@ -29,10 +37,26 @@ export class TwoStageGenerator {
       modelUsed = routeRes.modelUsed;
     }
 
-    const candidates = this.parseCandidatesFromLLM(rawText, topic, tone, candidateCount);
+    const hasRawOutput = rawText.trim().length > 0;
+    if (!hasRawOutput && !this.allowSimulation()) {
+      throw new Error(
+        'LLM_UNAVAILABLE: Yerel veya dış LLM sağlayıcısına ulaşılamadı ve production modunda simülasyon kapalı. Sahte çıktı üretilmez.'
+      );
+    }
+
+    const parsed = this.parseCandidatesFromLLM(rawText, topic, tone, candidateCount);
+    // Karakter sınırını zorla ve adayları gözlemlenebilir özelliklerden türetilen
+    // skorlarla sırala (sabit seçim / sabit skor yok).
+    for (const cand of parsed) {
+      cand.content = enforceCharacterLimit(cand.content);
+      cand.characterCount = cand.content.length;
+    }
+    // candidates orijinal üretim sırasında döner; selectedIndex bu dizideki
+    // en yüksek toplam skorun (argmax) indeksidir.
+    const { selectedIndex } = rankCandidates(parsed, topic);
     return {
-      candidates,
-      selectedIndex: 0,
+      candidates: parsed,
+      selectedIndex,
       telemetry,
       rawModel: modelUsed,
     };

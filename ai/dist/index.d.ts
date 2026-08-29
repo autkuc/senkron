@@ -1,5 +1,14 @@
 export declare function buildPrompt(topic: string, tone?: ContentTone): string;
 
+export declare interface CandidateScores {
+    relevance: number;
+    languageQuality: number;
+    novelty: number;
+    lengthFit: number;
+    safety: number;
+    total: number;
+}
+
 export declare interface ChatMessage {
     role: 'system' | 'user' | 'assistant';
     content: string;
@@ -63,8 +72,11 @@ export declare interface PostCandidate {
     content: string;
     hashtags: string[];
     characterCount: number;
+    /** Türetilmiş toplam skorun 0-100 ölçeği (açıklanabilir sıralama, sabit değer değil). */
     viralityScore: number;
+    /** Türetilmiş çeşitlilik (novelty) skorunun 0-100 ölçeği. */
     entropyScore: number;
+    scores?: CandidateScores;
 }
 
 export declare interface RouteExecutionResult {
@@ -75,8 +87,8 @@ export declare interface RouteExecutionResult {
 }
 
 export declare interface RoutingTelemetry {
-    routeUsed: 'internal' | 'external';
-    routeReason: 'local_healthy' | 'local_concurrency_saturated' | 'local_offline' | 'local_timeout_fallback' | 'forced_mode';
+    routeUsed: 'internal' | 'external' | 'simulated';
+    routeReason: 'local_healthy' | 'local_concurrency_saturated' | 'local_offline' | 'local_timeout_fallback' | 'forced_mode' | 'simulation_no_router';
     latencyMs: number;
     activeLocalSlots: number;
     maxLocalConcurrency: number;
@@ -108,6 +120,12 @@ export declare interface SmartRouterConfig {
     externalModelName?: string;
     healthCheckIntervalMs?: number;
     forceRoute?: 'internal' | 'external';
+    /**
+     * Yerel ve dış sağlayıcıya ulaşılamadığında deterministik simülasyona izin verilir mi?
+     * Varsayılan: NODE_ENV !== 'production'. Production'da false olmalı; sistem sahte çıktı
+     * yerine açık hata üretir.
+     */
+    allowSimulation?: boolean;
 }
 
 export declare const SYSTEM_PROMPT = "Sen NSosyal sosyal a\u011F platformu i\u00E7in uzman bir yapay zeka i\u00E7erik yazar\u0131s\u0131n.\nG\u00F6revlerin:\n1. Kullan\u0131c\u0131n\u0131n konusundan ilgi \u00E7ekici, y\u00FCksek etkile\u015Fimli ve kusursuz T\u00FCrk\u00E7e dil kurallar\u0131na uygun bir g\u00F6nderi olu\u015Fturmak.\n2. Kesinlikle YALNIZCA ak\u0131c\u0131, kurall\u0131 ve duru T\u00FCrk\u00E7e yaz. Yabanc\u0131 dildeki (\u0130ngilizce, Frans\u0131zca, Hint\u00E7e, Leh\u00E7e vb.) kelimeleri veya anlams\u0131z karakterleri ASLA kullanma.\n3. NSosyal platformunun 500 karakterlik s\u0131n\u0131r\u0131na kesinlikle uymak ve c\u00FCmleleri tam bitirmek.\n4. \u0130stenen tona (Viral, Kurumsal, E\u011Fitici, Samimi, Yarat\u0131c\u0131) uygun \u00FCslup kullanmak.\n5. G\u00F6nderinin sonuna 3-4 ilgili T\u00FCrk\u00E7e hashtag eklemek (\u00F6rne\u011Fin #NSosyal #Teknoloji).\n6. A\u015F\u0131r\u0131 reklam dili kullanmamak, do\u011Fal ve topluluk odakl\u0131 yazmak.";
@@ -120,7 +138,11 @@ export declare interface TokenMetrics {
 
 export declare class TwoStageGenerator {
     private router?;
-    constructor(router?: SmartRouter | undefined);
+    private options?;
+    constructor(router?: SmartRouter | undefined, options?: {
+        allowSimulation?: boolean;
+    } | undefined);
+    private allowSimulation;
     generateCandidates(topic: string, tone?: ContentTone, candidateCount?: number, chatExecutor?: (messages: ChatMessage[]) => Promise<{
         text: string;
         raw: unknown;

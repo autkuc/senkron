@@ -1,4 +1,4 @@
-import { i as k, a as x, b as n, n as d, r as h } from "../state-C6LA3nSk.mjs";
+import { i as k, a as x, b as s, n as d, r as h, M as w } from "../modal-a11y-CvyA2DZ2.mjs";
 const m = k`
   :host {
     display: block;
@@ -278,10 +278,10 @@ const m = k`
     color: #ffffff;
   }
 `;
-var w = Object.defineProperty, l = (c, t, r, a) => {
-  for (var e = void 0, i = c.length - 1, o; i >= 0; i--)
-    (o = c[i]) && (e = o(t, r, e) || e);
-  return e && w(t, r, e), e;
+var $ = Object.defineProperty, l = (c, e, r, o) => {
+  for (var t = void 0, i = c.length - 1, a; i >= 0; i--)
+    (a = c[i]) && (t = a(e, r, t) || t);
+  return t && $(e, r, t), t;
 };
 const b = {
   nsosyal: 500
@@ -296,34 +296,34 @@ const b = {
         maxCharacters: b.nsosyal
       }
     }, this.handleApplyToPost = () => {
-      const t = this.drafts.nsosyal;
-      if (!t.content) return;
-      const r = t.hashtags.length ? `
+      const e = this.drafts.nsosyal;
+      if (!e.content) return;
+      const r = e.hashtags.length ? `
 
-${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = {
+${e.hashtags.join(" ")}` : "", o = `${e.content}${r}`.trim(), t = {
         platform: "nsosyal",
-        content: t.content,
-        hashtags: t.hashtags,
-        fullText: a
+        content: e.content,
+        hashtags: e.hashtags,
+        fullText: o
       };
       this.dispatchEvent(
         new CustomEvent("senkron:post-applied", {
-          detail: e,
+          detail: t,
           bubbles: !0,
           composed: !0
         })
       );
     }, this.handleCopy = async () => {
-      const t = this.drafts.nsosyal;
-      if (!t.content) return;
-      const r = t.hashtags.length ? `
+      const e = this.drafts.nsosyal;
+      if (!e.content) return;
+      const r = e.hashtags.length ? `
 
-${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim();
-      typeof navigator < "u" && navigator.clipboard && await navigator.clipboard.writeText(a), this.copied = !0, setTimeout(() => {
+${e.hashtags.join(" ")}` : "", o = `${e.content}${r}`.trim();
+      typeof navigator < "u" && navigator.clipboard && await navigator.clipboard.writeText(o), this.copied = !0, setTimeout(() => {
         this.copied = !1;
       }, 2e3), this.dispatchEvent(
         new CustomEvent("senkron:post-copied", {
-          detail: { platform: "nsosyal", text: a },
+          detail: { platform: "nsosyal", text: o },
           bubbles: !0,
           composed: !0
         })
@@ -333,15 +333,15 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim();
   connectedCallback() {
     super.connectedCallback(), this.defaultTone && (this.tone = this.defaultTone);
   }
-  setTone(t) {
-    this.tone = t;
+  setTone(e) {
+    this.tone = e;
   }
   async handleGenerate() {
     if (this.isGenerating) return;
     this.isGenerating = !0, this.errorMessage = null;
-    const t = this.apiUrl || "/api/ai/generate", r = this.topic.trim() || "NSosyal platform güncellemesi ve yenilikler";
+    const e = this.apiUrl || "/api/ai/generate", r = this.topic.trim() || "NSosyal platform güncellemesi ve yenilikler";
     try {
-      const a = await fetch(t, {
+      const o = await fetch(e, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -354,37 +354,37 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim();
           tone: this.tone
         })
       });
-      if (!a.ok) {
-        const i = await a.json().catch(() => ({}));
-        throw new Error(i.error || `Sunucu hatası (${a.status})`);
+      if (!o.ok) {
+        const i = await o.json().catch(() => ({}));
+        throw new Error(i.error || `Sunucu hatası (${o.status})`);
       }
-      const e = await a.json();
-      if (e.data && e.data.content) {
-        const i = e.data.content, o = e.data.hashtags || [], v = i.length + (o.length ? o.join(" ").length + 2 : 0);
+      const t = await o.json();
+      if (t.data && t.data.content) {
+        const i = t.data.content, a = t.data.hashtags || [], y = i.length + (a.length ? a.join(" ").length + 2 : 0);
         this.drafts = {
           nsosyal: {
             platform: "nsosyal",
             content: i,
-            hashtags: o,
-            characterCount: v,
+            hashtags: a,
+            characterCount: y,
             maxCharacters: b.nsosyal
           }
         };
-        const y = this.drafts.nsosyal;
+        const v = this.drafts.nsosyal;
         this.dispatchEvent(
           new CustomEvent("senkron:post-generated", {
-            detail: { platform: "nsosyal", draft: y },
+            detail: { platform: "nsosyal", draft: v },
             bubbles: !0,
             composed: !0
           })
         );
       } else
         throw new Error("Geçersiz yanıt formatı alındı.");
-    } catch (a) {
-      const e = a instanceof Error ? a.message : "Taslak üretimi başarısız oldu";
-      this.errorMessage = e, this.dispatchEvent(
+    } catch (o) {
+      const t = o instanceof Error ? o.message : "Taslak üretimi başarısız oldu";
+      this.errorMessage = t, this.dispatchEvent(
         new CustomEvent("senkron:post-error", {
-          detail: { message: e },
+          detail: { message: t },
           bubbles: !0,
           composed: !0
         })
@@ -394,10 +394,10 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim();
     }
   }
   render() {
-    const t = this.drafts.nsosyal, r = t.hashtags.length ? `
+    const e = this.drafts.nsosyal, r = e.hashtags.length ? `
 
-${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.maxCharacters, i = !!(t.content && t.content.trim().length > 0);
-    return n`
+${e.hashtags.join(" ")}` : "", o = `${e.content}${r}`.trim(), t = o.length > e.maxCharacters, i = !!(e.content && e.content.trim().length > 0);
+    return s`
       <div class="generator-container">
         <!-- Controls -->
         <div class="control-panel">
@@ -409,18 +409,19 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
           </div>
 
           <div class="form-group">
-            <label class="form-label">Konu / Anahtar Fikirler</label>
+            <label class="form-label" for="senkron-pg-topic">Konu / Anahtar Fikirler</label>
             <textarea
+              id="senkron-pg-topic"
               class="text-area"
               placeholder="Örn: Yeni video düzenleyicimizi duyuruyoruz, WASM ile hızlı..."
               .value=${this.topic}
-              @input=${(o) => this.topic = o.target.value}
+              @input=${(a) => this.topic = a.target.value}
             ></textarea>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Ton & Üslup</label>
-            <div class="tone-chips">
+            <label class="form-label" id="senkron-pg-tone-label">Ton & Üslup</label>
+            <div class="tone-chips" role="group" aria-labelledby="senkron-pg-tone-label">
               ${[
       { id: "viral", label: "🔥 Viral" },
       { id: "professional", label: "💼 Kurumsal" },
@@ -428,12 +429,13 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
       { id: "casual", label: "☕ Samimi" },
       { id: "witty", label: "✨ Yaratıcı" }
     ].map(
-      (o) => n`
+      (a) => s`
                   <button
-                    class="tone-chip ${this.tone === o.id ? "active" : ""}"
-                    @click=${() => this.setTone(o.id)}
+                    class="tone-chip ${this.tone === a.id ? "active" : ""}"
+                    aria-pressed=${this.tone === a.id ? "true" : "false"}
+                    @click=${() => this.setTone(a.id)}
                   >
-                    ${o.label}
+                    ${a.label}
                   </button>
                 `
     )}
@@ -443,13 +445,17 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
           <button
             class="btn btn-primary"
             ?disabled=${this.isGenerating}
+            aria-busy=${this.isGenerating ? "true" : "false"}
             @click=${this.handleGenerate}
           >
             ${this.isGenerating ? "Yapay Zeka Üretiyor..." : "Taslak Oluştur"}
           </button>
 
-          ${this.errorMessage ? n`
-                <div style="margin-top: 10px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; color: #fca5a5;">
+          ${this.errorMessage ? s`
+                <div
+                  role="alert"
+                  style="margin-top: 10px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; color: #fca5a5;"
+                >
                   ${this.errorMessage}
                 </div>
               ` : ""}
@@ -478,23 +484,23 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
               </div>
             </div>
 
-            ${this.isGenerating ? n`
+            ${this.isGenerating ? s`
                   <div style="padding: 24px 0; text-align: center; color: #38bdf8;">
                     <div style="display: inline-block; width: 24px; height: 24px; border: 2px solid #38bdf8; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px;"></div>
                     <div style="font-size: 13px; font-weight: 500;">Llama 3.2 Türkçe Modeli Metin Üretiyor...</div>
                   </div>
-                ` : i ? n`
-                  <div class="card-content" style="white-space: pre-wrap;">${t.content}</div>
+                ` : i ? s`
+                  <div class="card-content" style="white-space: pre-wrap;">${e.content}</div>
 
                   <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
-                    ${t.hashtags.map(
-      (o) => n`<span class="hashtag-pill">${o}</span>`
+                    ${e.hashtags.map(
+      (a) => s`<span class="hashtag-pill">${a}</span>`
     )}
                   </div>
 
                   <div class="char-counter">
-                    <span style="${e ? "color: #ef4444; font-weight: 600;" : ""}">
-                      ${a.length} / ${t.maxCharacters} karakter
+                    <span style="${t ? "color: #ef4444; font-weight: 600;" : ""}">
+                      ${o.length} / ${e.maxCharacters} karakter
                     </span>
 
                     <div style="display: flex; gap: 6px;">
@@ -510,7 +516,7 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
                       </button>
                     </div>
                   </div>
-                ` : n`
+                ` : s`
                   <div style="padding: 32px 16px; text-align: center; color: #64748b; font-size: 13px;">
                     Konunuzu yazıp sol taraftaki <strong>'Taslak Oluştur'</strong> butonuna basarak ince ayarlı Türkçe Llama modelinden özgün gönderi önerisi alabilirsiniz.
                   </div>
@@ -522,52 +528,55 @@ ${t.hashtags.join(" ")}` : "", a = `${t.content}${r}`.trim(), e = a.length > t.m
   }
 };
 g.styles = m;
-let s = g;
+let n = g;
 l([
   d({ type: String, attribute: "api-url" })
-], s.prototype, "apiUrl");
+], n.prototype, "apiUrl");
 l([
   d({ type: String, attribute: "graphql-url" })
-], s.prototype, "graphqlUrl");
+], n.prototype, "graphqlUrl");
 l([
   d({ type: String, attribute: "default-tone" })
-], s.prototype, "defaultTone");
+], n.prototype, "defaultTone");
 l([
   d({ type: String })
-], s.prototype, "topic");
+], n.prototype, "topic");
 l([
   h()
-], s.prototype, "tone");
+], n.prototype, "tone");
 l([
   h()
-], s.prototype, "isGenerating");
+], n.prototype, "isGenerating");
 l([
   h()
-], s.prototype, "errorMessage");
+], n.prototype, "errorMessage");
 l([
   h()
-], s.prototype, "copied");
+], n.prototype, "copied");
 l([
   h()
-], s.prototype, "drafts");
-var $ = Object.defineProperty, f = (c, t, r, a) => {
-  for (var e = void 0, i = c.length - 1, o; i >= 0; i--)
-    (o = c[i]) && (e = o(t, r, e) || e);
-  return e && $(t, r, e), e;
+], n.prototype, "drafts");
+var z = Object.defineProperty, f = (c, e, r, o) => {
+  for (var t = void 0, i = c.length - 1, a; i >= 0; i--)
+    (a = c[i]) && (t = a(e, r, t) || t);
+  return t && z(e, r, t), t;
 };
 const u = class u extends x {
   constructor() {
-    super(...arguments), this.open = !1, this.apiUrl = "", this.defaultTone = "viral", this.topic = "", this.handleBackdropClick = (t) => {
-      t.target.classList.contains("modal-backdrop") && this.closeModal();
-    }, this.handlePostApplied = (t) => {
+    super(...arguments), this.a11y = new w(this, () => this.closeModal()), this.open = !1, this.apiUrl = "", this.defaultTone = "viral", this.topic = "", this.handleBackdropClick = (e) => {
+      e.target.classList.contains("modal-backdrop") && this.closeModal();
+    }, this.handlePostApplied = (e) => {
       this.dispatchEvent(
         new CustomEvent("senkron:post-applied", {
-          detail: t.detail,
+          detail: e.detail,
           bubbles: !0,
           composed: !0
         })
       ), this.closeModal();
     };
+  }
+  updated(e) {
+    e.has("open") && this.a11y.openChanged(this.open);
   }
   openModal() {
     this.open = !0;
@@ -581,17 +590,31 @@ const u = class u extends x {
     );
   }
   render() {
-    return this.open ? n`
+    return this.open ? s`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
-        <div class="modal-dialog">
+        <div
+          class="modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="senkron-pgm-title"
+          @keydown=${this.a11y.handleKeydown}
+        >
           <div class="modal-topbar">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 600; font-size: 14px; color: #f1f5f9;">
+              <span
+                id="senkron-pgm-title"
+                style="font-weight: 600; font-size: 14px; color: #f1f5f9;"
+              >
                 Taslak Oluşturucu
               </span>
             </div>
 
-            <button class="modal-close-btn" @click=${this.closeModal} title="Kapat">
+            <button
+              class="modal-close-btn"
+              @click=${this.closeModal}
+              title="Kapat"
+              aria-label="Taslak Oluşturucu'yu kapat"
+            >
               ✕
             </button>
           </div>
@@ -606,7 +629,7 @@ const u = class u extends x {
           ></senkron-post-generator>
         </div>
       </div>
-    ` : n``;
+    ` : s``;
   }
 };
 u.styles = m;
@@ -623,8 +646,8 @@ f([
 f([
   d({ type: String })
 ], p.prototype, "topic");
-typeof window < "u" && (customElements.get("senkron-post-generator") || customElements.define("senkron-post-generator", s), customElements.get("senkron-post-generator-modal") || customElements.define("senkron-post-generator-modal", p));
+typeof window < "u" && (customElements.get("senkron-post-generator") || customElements.define("senkron-post-generator", n), customElements.get("senkron-post-generator-modal") || customElements.define("senkron-post-generator-modal", p));
 export {
-  s as SenkronPostGenerator,
+  n as SenkronPostGenerator,
   p as SenkronPostGeneratorModal
 };

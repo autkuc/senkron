@@ -58,6 +58,8 @@ const ai_1 = require("@senkron/ai");
         (0, vitest_1.expect)(res.content).toBeDefined();
         (0, vitest_1.expect)(res.candidates.length).toBeGreaterThanOrEqual(1);
         (0, vitest_1.expect)(res.routingTelemetry).toBeDefined();
-        (0, vitest_1.expect)(res.routingTelemetry.routeUsed).toBe('internal');
+        // Test ortamında yerel LLM yok: telemetri dürüstçe simülasyon olarak işaretlenir
+        (0, vitest_1.expect)(res.routingTelemetry.routeUsed).toBe('simulated');
+        (0, vitest_1.expect)(res.routingTelemetry.fallbackTriggered).toBe(true);
     });
 });

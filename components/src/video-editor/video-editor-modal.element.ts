@@ -1,11 +1,18 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { videoEditorStyles } from './styles';
 import { VideoAttachedDetail } from './types';
+import { ModalA11y } from '../a11y/modal-a11y';
 import './video-editor.element';
 
 export class SenkronVideoEditorModal extends LitElement {
   static styles = videoEditorStyles;
+
+  private a11y = new ModalA11y(this, () => this.closeModal());
+
+  protected updated(changed: PropertyValues<this>): void {
+    if (changed.has('open')) void this.a11y.openChanged(this.open);
+  }
 
   @property({ type: Boolean, reflect: true })
   open = false;
@@ -56,15 +63,29 @@ export class SenkronVideoEditorModal extends LitElement {
 
     return html`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
-        <div class="modal-dialog">
+        <div
+          class="modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="senkron-vem-title"
+          @keydown=${this.a11y.handleKeydown}
+        >
           <div class="modal-topbar">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 600; font-size: 14px; color: #f1f5f9;">
+              <span
+                id="senkron-vem-title"
+                style="font-weight: 600; font-size: 14px; color: #f1f5f9;"
+              >
                 Video Düzenle
               </span>
             </div>
 
-            <button class="modal-close-btn" @click=${this.closeModal} title="Kapat">
+            <button
+              class="modal-close-btn"
+              @click=${this.closeModal}
+              title="Kapat"
+              aria-label="Video düzenleyiciyi kapat"
+            >
               ✕
             </button>
           </div>

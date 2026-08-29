@@ -16,24 +16,37 @@ export interface ModerationResult {
   confidenceScore: number;
 }
 
+export interface CandidateScores {
+  relevance: number;
+  languageQuality: number;
+  novelty: number;
+  lengthFit: number;
+  safety: number;
+  total: number;
+}
+
 export interface PostCandidate {
   id: string;
   hook: string;
   content: string;
   hashtags: string[];
   characterCount: number;
+  /** Türetilmiş toplam skorun 0-100 ölçeği (açıklanabilir sıralama, sabit değer değil). */
   viralityScore: number;
+  /** Türetilmiş çeşitlilik (novelty) skorunun 0-100 ölçeği. */
   entropyScore: number;
+  scores?: CandidateScores;
 }
 
 export interface RoutingTelemetry {
-  routeUsed: 'internal' | 'external';
+  routeUsed: 'internal' | 'external' | 'simulated';
   routeReason:
     | 'local_healthy'
     | 'local_concurrency_saturated'
     | 'local_offline'
     | 'local_timeout_fallback'
-    | 'forced_mode';
+    | 'forced_mode'
+    | 'simulation_no_router';
   latencyMs: number;
   activeLocalSlots: number;
   maxLocalConcurrency: number;
@@ -89,6 +102,12 @@ export interface SmartRouterConfig {
   externalModelName?: string;
   healthCheckIntervalMs?: number;
   forceRoute?: 'internal' | 'external';
+  /**
+   * Yerel ve dış sağlayıcıya ulaşılamadığında deterministik simülasyona izin verilir mi?
+   * Varsayılan: NODE_ENV !== 'production'. Production'da false olmalı; sistem sahte çıktı
+   * yerine açık hata üretir.
+   */
+  allowSimulation?: boolean;
 }
 
 export interface LLMBackendConfig extends SmartRouterConfig {

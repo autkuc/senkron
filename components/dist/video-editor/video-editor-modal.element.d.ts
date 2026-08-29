@@ -1,7 +1,9 @@
-import { LitElement } from 'lit';
+import { LitElement, PropertyValues } from 'lit';
 
 export declare class SenkronVideoEditorModal extends LitElement {
     static styles: import('lit').CSSResult;
+    private a11y;
+    protected updated(changed: PropertyValues<this>): void;
     open: boolean;
     src: string;
     aspectRatio: string;

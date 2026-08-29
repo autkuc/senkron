@@ -1,11 +1,18 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { postGeneratorStyles } from './styles';
 import { ContentTone, PostAppliedDetail } from './types';
+import { ModalA11y } from '../a11y/modal-a11y';
 import './post-generator.element';
 
 export class SenkronPostGeneratorModal extends LitElement {
   static styles = postGeneratorStyles;
+
+  private a11y = new ModalA11y(this, () => this.closeModal());
+
+  protected updated(changed: PropertyValues<this>): void {
+    if (changed.has('open')) void this.a11y.openChanged(this.open);
+  }
 
   @property({ type: Boolean, reflect: true })
   open = false;
@@ -55,15 +62,29 @@ export class SenkronPostGeneratorModal extends LitElement {
 
     return html`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
-        <div class="modal-dialog">
+        <div
+          class="modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="senkron-pgm-title"
+          @keydown=${this.a11y.handleKeydown}
+        >
           <div class="modal-topbar">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 600; font-size: 14px; color: #f1f5f9;">
+              <span
+                id="senkron-pgm-title"
+                style="font-weight: 600; font-size: 14px; color: #f1f5f9;"
+              >
                 Taslak Oluşturucu
               </span>
             </div>
 
-            <button class="modal-close-btn" @click=${this.closeModal} title="Kapat">
+            <button
+              class="modal-close-btn"
+              @click=${this.closeModal}
+              title="Kapat"
+              aria-label="Taslak Oluşturucu'yu kapat"
+            >
               ✕
             </button>
           </div>

@@ -192,8 +192,9 @@ export class SenkronPostGenerator extends LitElement {
           </div>
 
           <div class="form-group">
-            <label class="form-label">Konu / Anahtar Fikirler</label>
+            <label class="form-label" for="senkron-pg-topic">Konu / Anahtar Fikirler</label>
             <textarea
+              id="senkron-pg-topic"
               class="text-area"
               placeholder="Örn: Yeni video düzenleyicimizi duyuruyoruz, WASM ile hızlı..."
               .value=${this.topic}
@@ -202,8 +203,8 @@ export class SenkronPostGenerator extends LitElement {
           </div>
 
           <div class="form-group">
-            <label class="form-label">Ton & Üslup</label>
-            <div class="tone-chips">
+            <label class="form-label" id="senkron-pg-tone-label">Ton & Üslup</label>
+            <div class="tone-chips" role="group" aria-labelledby="senkron-pg-tone-label">
               ${[
                 { id: 'viral', label: '🔥 Viral' },
                 { id: 'professional', label: '💼 Kurumsal' },
@@ -214,6 +215,7 @@ export class SenkronPostGenerator extends LitElement {
                 (t) => html`
                   <button
                     class="tone-chip ${this.tone === t.id ? 'active' : ''}"
+                    aria-pressed=${this.tone === t.id ? 'true' : 'false'}
                     @click=${() => this.setTone(t.id as ContentTone)}
                   >
                     ${t.label}
@@ -226,6 +228,7 @@ export class SenkronPostGenerator extends LitElement {
           <button
             class="btn btn-primary"
             ?disabled=${this.isGenerating}
+            aria-busy=${this.isGenerating ? 'true' : 'false'}
             @click=${this.handleGenerate}
           >
             ${this.isGenerating ? 'Yapay Zeka Üretiyor...' : 'Taslak Oluştur'}
@@ -233,7 +236,10 @@ export class SenkronPostGenerator extends LitElement {
 
           ${this.errorMessage
             ? html`
-                <div style="margin-top: 10px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; color: #fca5a5;">
+                <div
+                  role="alert"
+                  style="margin-top: 10px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; font-size: 12px; color: #fca5a5;"
+                >
                   ${this.errorMessage}
                 </div>
               `

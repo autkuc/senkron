@@ -50,8 +50,16 @@ describe('Senkron AI Engine & Guardrails', () => {
 
     // Candidates and routing telemetry verification
     expect(result.candidates).toHaveLength(3);
-    expect(result.selectedCandidateIndex).toBe(0);
+
+    // Seçim sabit değil: skorların argmax'ı ile tutarlı olmalı
+    const totals = result.candidates.map((c) => c.scores?.total ?? -1);
+    const argmax = totals.indexOf(Math.max(...totals));
+    expect(result.selectedCandidateIndex).toBe(argmax);
+
     expect(result.routingTelemetry).toBeDefined();
-    expect(result.routingTelemetry.routeUsed).toBe('internal');
+    // Test ortamında yerel model bulunmadığı için telemetri dürüstçe
+    // simülasyon olarak işaretlenmeli (sahte 'internal' değil)
+    expect(result.routingTelemetry.routeUsed).toBe('simulated');
+    expect(result.routingTelemetry.fallbackTriggered).toBe(true);
   });
 });

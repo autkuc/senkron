@@ -71,6 +71,33 @@ describe('SmartRouter Traffic Management', () => {
     expect(result.rawText).toBe('External burst post response');
   });
 
+  it('does not fabricate output when BOTH providers fail in production mode', async () => {
+    const router = new SmartRouter({
+      externalApiKey: 'test-key',
+      allowSimulation: false,
+    });
+
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'));
+
+    await expect(
+      router.executeChat([{ role: 'user', content: 'Herhangi bir konu' }])
+    ).rejects.toThrow(/LLM_UNAVAILABLE/);
+  });
+
+  it('labels dual-provider failure as simulated (not external) when simulation is allowed', async () => {
+    const router = new SmartRouter({
+      externalApiKey: 'test-key',
+      allowSimulation: true,
+    });
+
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'));
+
+    const result = await router.executeChat([{ role: 'user', content: 'Herhangi bir konu' }]);
+    expect(result.telemetry.routeUsed).toBe('simulated');
+    expect(result.telemetry.fallbackTriggered).toBe(true);
+    expect(result.modelUsed).toContain('-simulated');
+  });
+
   it('falls back to external when local inference times out or throws', async () => {
     const router = new SmartRouter({
       localTimeoutMs: 50,

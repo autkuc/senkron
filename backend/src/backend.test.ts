@@ -65,6 +65,8 @@ describe('Senkron Backend Services & Logic', () => {
     expect(res.content).toBeDefined();
     expect(res.candidates.length).toBeGreaterThanOrEqual(1);
     expect(res.routingTelemetry).toBeDefined();
-    expect(res.routingTelemetry.routeUsed).toBe('internal');
+    // Test ortamında yerel LLM yok: telemetri dürüstçe simülasyon olarak işaretlenir
+    expect(res.routingTelemetry.routeUsed).toBe('simulated');
+    expect(res.routingTelemetry.fallbackTriggered).toBe(true);
   });
 });

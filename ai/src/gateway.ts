@@ -28,9 +28,12 @@ export class LLMGateway {
       externalApiKey: this.config.apiKey || this.config.externalApiKey || process.env.EXTERNAL_LLM_API_KEY,
       externalModelName: this.config.externalModelName || process.env.EXTERNAL_LLM_MODEL || 'gpt-4o-mini',
       forceRoute: this.config.forceRoute || (this.config.type === 'external' ? 'external' : undefined),
+      allowSimulation: config?.allowSimulation ?? process.env.NODE_ENV !== 'production',
     });
 
-    this.pipeline = new TwoStageGenerator(this.router);
+    this.pipeline = new TwoStageGenerator(this.router, {
+      allowSimulation: config?.allowSimulation ?? process.env.NODE_ENV !== 'production',
+    });
   }
 
   public getRouter(): SmartRouter {
@@ -68,13 +71,15 @@ export class LLMGateway {
     const promptTokens = Math.ceil(req.topic.length / 4) + 50;
     const completionTokens = Math.ceil(cleanContent.length / 4);
 
+    // Telemetri yoksa (örn. test için dışarıdan chatExecutor verildiyse) uydurma
+    // değer değil, açıkça simülasyon olduğunu beyan eden kayıt üretilir.
     const routingTelemetry: RoutingTelemetry = pipelineResult.telemetry || {
-      routeUsed: 'internal',
-      routeReason: 'local_healthy',
-      latencyMs: 120,
+      routeUsed: 'simulated',
+      routeReason: 'simulation_no_router',
+      latencyMs: 0,
       activeLocalSlots: 0,
       maxLocalConcurrency: this.config.maxLocalConcurrency || 2,
-      fallbackTriggered: false,
+      fallbackTriggered: true,
     };
 
     return {

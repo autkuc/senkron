@@ -11,7 +11,7 @@
 
 Senkron solves the two largest cost and infrastructure bottlenecks in social platforms:
 1. **Video Transcoding Infrastructure Costs**: Offloads video processing (trimming, cropping, filtering, rendering) directly to user devices via **WebAssembly FFmpeg**, cutting server compute and bandwidth expenditures by over **85%**.
-2. **Generic, Disconnected AI Output**: Employs a custom **fine-tuned Turkish LoRA LLM** (`Llama-3.2-3B` with $r=32, \alpha=64$) trained on authentic Turkish developer and community microblog datasets to deliver 100% fluent, engaging, and culturally resonant social posts without robotic AI boilerplate or multilingual artifacts.
+2. **Generic, Disconnected AI Output**: Employs a custom **fine-tuned Turkish LoRA LLM** (`Llama-3.2-3B` with $r=32, \alpha=64$) fine-tuned on a **synthetic** Turkish microblog-style dataset (2,000 template-derived samples across 5 tones; generation script and data provenance in `ai/training/`) to deliver fluent, engaging, and culturally resonant social posts without robotic AI boilerplate or multilingual artifacts.
 
 ---
 
@@ -74,7 +74,7 @@ Senkron/
 │   │   ├── router/           # Concurrency-aware SmartRouter (Local Ollama / Modal Cloud)
 │   │   └── pipeline/         # TwoStageGenerator with virality ranking & lexical cleaner
 │   └── training/             # Serverless PyTorch QLoRA fine-tuning suite for Modal
-│       ├── modal_dataset.py  # 2,000-sample authentic Turkish NSosyal dataset synthesizer
+│       ├── modal_dataset.py  # 2,000-sample SYNTHETIC Turkish NSosyal dataset generator (5 tones)
 │       ├── modal_train.py    # Production QLoRA trainer (r=32, alpha=64, bf16)
 │       └── modal_serve.py    # High-performance ASGI FastAPI GPU inference endpoint
 ├── backend/             # Microservice backend, rate-limiter, and hybrid router (@senkron/backend)
@@ -104,7 +104,7 @@ Senkron/
 - **React & Vanilla Support**: Exported as native Custom Elements as well as high-level React wrappers (`@senkron/components/react`).
 
 ### 2. `@senkron/ai` — Turkish LoRA Model & Guardrails
-- **Fine-Tuned Turkish LoRA**: Custom LoRA adapter on `Llama-3.2-3B` ($r=32, \alpha=64$, 48.6M trainable parameters) fine-tuned on 2,000 authentic microblog samples.
+- **Fine-Tuned Turkish LoRA**: Custom LoRA adapter on `Llama-3.2-3B` ($r=32, \alpha=64$, 48.6M trainable parameters) fine-tuned on 2,000 synthetic Turkish microblog-style samples.
 - **Two-Stage Multi-Candidate Generation**: Generates multiple ranked post variations per prompt with virality and entropy score telemetry.
 - **Zero Foreign Word Leakage**: Built-in bidirectional lexical sanitizer and casing normalizer ensures 100% pure, natural Turkish syntax.
 - **Double-Pass Guardrails**: Defends against prompt injections, system leaks, and toxic/hateful content in Turkish and English before hitting LLM inference.
@@ -126,8 +126,8 @@ Senkron/
 | **Server Video Compute Cost** | **$0.0018 / video** | $0.0150 / video | **88.0% Cost Reduction** |
 | **Video Router Decision Throughput** | **118,789 req/sec** | 10,000 req/sec | **11.8x Faster** |
 | **AI Moderation Engine Speed** | **125,921 ops/sec** | 15,000 ops/sec | **8.4x Faster** |
-| **LoRA Fine-Tuning Accuracy** | **99.30% Token Acc** | 85.0% Baseline | **Flawless Turkish Syntax** |
-| **End-to-End Test Suite** | **28/28 Passed (100%)** | — | **Zero Flakiness** |
+| **LoRA Fine-Tuning** | **99.30% training-time token acc** (holdout evaluation pending — not an independent benchmark) | — | See Limitations |
+| **Unit + Integration Tests** | **53/53 Passed** (ai 20, backend 9, components 24) | — | Run: `npm --prefix <pkg> test` |
 
 ---
 
@@ -153,10 +153,10 @@ cd demo && npm install && cd ..
 ### 2. Running Automated Tests
 Run the comprehensive Vitest unit and integration test suites:
 ```bash
-# Run components test suite (8 tests)
+# Run components test suite (24 tests)
 npm --prefix components test
 
-# Run AI guardrails & routing test suite (11 tests)
+# Run AI guardrails & routing test suite (18 tests)
 npm --prefix ai test
 
 # Run backend services, rate limiter & load benchmarks (9 tests)
@@ -271,6 +271,18 @@ modal deploy ai/training/modal_serve.py
 - **Prompt Injection Defense**: Multi-pattern regex and semantic heuristics intercept jailbreaks and malicious system overrides before LLM inference.
 
 ---
+
+## ⚠️ Limitations & Verification Status
+
+Bu depo iddia-kanıt hizası ilkesiyle tutulur; doğrulanmamış hiçbir metrik başarı olarak sunulmaz.
+
+- **Model değerlendirme:** %99,30 token doğruluğu **eğitim-zamanı** metriğidir; bağımsız holdout evaluation henüz koşutulmamıştır (`ai/training/` içinde val-split yoktur). Değerlendirme hattı eklendiğinde sonuçlar `docs/evidence/` altına ham çıktılarıyla konur.
+- **Model ağırlıkları:** LoRA/GGUF ağırlıkları `.gitignore` gereği depoda değildir; eğitim `ai/training/modal_train.py` ile yeniden üretilebilir.
+- **Veri seti:** Eğitim verisi **sentetiktir** (şablon türevli 2.000 örnek); gerçek kullanıcı verisi olarak sunulmaz.
+- **Simülasyon politikası:** `NODE_ENV=production` iken LLM'e ulaşılamazsa sistem sahte çıktı üretmez, `LLM_UNAVAILABLE` hatası döner. Geliştirme/test ortamında simülasyon telemetride `routeUsed: "simulated"` olarak açıkça işaretlenir.
+- **Aday sıralama:** İki aşamalı üreteç adayları `ai/src/pipeline/scoring.ts` içindeki açıklanabilir ağırlıklı skorlarla (relevance, languageQuality, novelty, lengthFit, safety) sıralar; sabit seçim veya sabit skor yoktur.
+- **E2E video export:** Gerçek tarayıcı E2E testi `e2e/export.e2e.ts` içindedir; headless CI kumunda WASM motoru yüklemesi tamamlanamadığından export doğrulaması bu ortamda **tamamlanmamıştır**. Durum ve kanıtlar: `docs/evidence/VERIFICATION.md`.
+- **Erişilebilirlik:** Modallar WAI-ARIA dialog semantiği, odak tuzağı ve Escape desteği içerir; klavye testleri `components/src/a11y/modal-a11y.test.ts` içindedir. Axe/Lighthouse raporu henüz eklenmemiştir.
 
 ## 📄 License & Attribution
 
