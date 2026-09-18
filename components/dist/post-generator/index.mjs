@@ -277,6 +277,51 @@ const m = k`
     background: #334155;
     color: #ffffff;
   }
+
+  @media (max-width: 640px) {
+    .modal-backdrop {
+      padding: 6px;
+    }
+
+    .modal-dialog {
+      max-height: 96vh;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .generator-container {
+      min-height: 0;
+      max-height: calc(96vh - 48px);
+      overflow-y: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .control-panel {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+
+    .preview-panel {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+
+    .text-area {
+      min-height: 60px;
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+
+    .tone-chip {
+      padding: 4px 8px;
+      font-size: 10px;
+    }
+
+    .modal-topbar {
+      padding: 10px 14px;
+    }
+  }
 `;
 var $ = Object.defineProperty, l = (c, e, r, o) => {
   for (var t = void 0, i = c.length - 1, a; i >= 0; i--)

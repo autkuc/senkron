@@ -9,9 +9,16 @@ export class LLMGateway {
   private pipeline: TwoStageGenerator;
 
   constructor(config?: Partial<LLMBackendConfig>) {
+    const defaultBaseUrl =
+      process.env.LLM_BASE_URL ||
+      process.env.LOCAL_LLM_BASE_URL ||
+      (process.env.NODE_ENV === 'test'
+        ? 'http://localhost:11434/v1'
+        : 'https://arapronaldosui--senkron-turkish-llm-service-api.modal.run');
+
     this.config = {
       type: (process.env.LLM_BACKEND_TYPE as 'internal' | 'external') || 'internal',
-      baseUrl: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
+      baseUrl: config?.baseUrl || defaultBaseUrl,
       apiKey: process.env.LLM_API_KEY || '',
       modelName: process.env.LLM_MODEL_NAME || 'senkron-turkish-llama3.2:3b',
       maxLocalConcurrency: config?.maxLocalConcurrency ?? Number(process.env.MAX_LOCAL_CONCURRENCY || 2),

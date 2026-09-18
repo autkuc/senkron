@@ -310,13 +310,17 @@ export const OfflineDinoGame: React.FC<OfflineDinoGameProps> = ({
       {/* Canvas Game Area */}
       <div
         onClick={jump}
-        className="relative cursor-pointer rounded-xl overflow-hidden border border-slate-800 bg-[#0a0f1d] select-none"
+        onTouchStart={(e) => {
+          e.preventDefault();
+          jump();
+        }}
+        className="relative cursor-pointer rounded-xl overflow-hidden border border-slate-800 bg-[#0a0f1d] select-none touch-none"
       >
         <canvas
           ref={canvasRef}
           width={600}
           height={200}
-          className="w-full h-[180px] sm:h-[200px] block"
+          className="w-full h-[160px] sm:h-[200px] block"
         />
 
         {/* Live Score Overlay */}

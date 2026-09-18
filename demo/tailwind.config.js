@@ -18,6 +18,9 @@ module.exports = {
           hover: '#19243b',
         },
       },
+      screens: {
+        xs: '480px',
+      },
       backgroundImage: {
         'nsosyal-gradient': 'linear-gradient(90deg, #07d0e0 0%, #324bff 100%)',
         'nsosyal-radial': 'radial-gradient(circle, rgba(7, 208, 224, 0.15) 0%, rgba(50, 75, 255, 0) 70%)',

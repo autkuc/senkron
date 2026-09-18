@@ -63,7 +63,6 @@ Senkron solves the two largest cost and infrastructure bottlenecks in social pla
 ```
 Senkron/
 ├── package.json         # Root monorepo orchestration & npm workspaces
-├── .env.example         # Production environment variables template
 ├── DEPLOYMENT.md        # Comprehensive VPS & production operations manual
 ├── scripts/             # Automated build pipeline
 │   └── build.sh

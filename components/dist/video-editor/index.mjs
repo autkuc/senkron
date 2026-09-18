@@ -1,10 +1,10 @@
 var Z = Object.defineProperty;
-var V = (a) => {
-  throw TypeError(a);
+var V = (r) => {
+  throw TypeError(r);
 };
-var J = (a, e, t) => e in a ? Z(a, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : a[e] = t;
-var u = (a, e, t) => J(a, typeof e != "symbol" ? e + "" : e, t), j = (a, e, t) => e.has(a) || V("Cannot " + t);
-var o = (a, e, t) => (j(a, e, "read from private field"), t ? t.call(a) : e.get(a)), T = (a, e, t) => e.has(a) ? V("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(a) : e.set(a, t), U = (a, e, t, i) => (j(a, e, "write to private field"), i ? i.call(a, t) : e.set(a, t), t);
+var J = (r, e, t) => e in r ? Z(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var u = (r, e, t) => J(r, typeof e != "symbol" ? e + "" : e, t), j = (r, e, t) => e.has(r) || V("Cannot " + t);
+var o = (r, e, t) => (j(r, e, "read from private field"), t ? t.call(r) : e.get(r)), T = (r, e, t) => e.has(r) ? V("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(r) : e.set(r, t), U = (r, e, t, i) => (j(r, e, "write to private field"), i ? i.call(r, t) : e.set(r, t), t);
 import { i as Q, a as X, b, n as k, r as x, M as ee } from "../modal-a11y-CvyA2DZ2.mjs";
 const q = Q`
   :host {
@@ -431,17 +431,88 @@ const q = Q`
     background: #334155;
     color: #ffffff;
   }
+
+  @media (max-width: 640px) {
+    .modal-backdrop {
+      padding: 6px;
+    }
+
+    .modal-dialog {
+      max-height: 96vh;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-container {
+      min-height: 0;
+      max-height: calc(96vh - 48px);
+      overflow-y: auto;
+    }
+
+    .editor-header {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .editor-title {
+      font-size: 12px;
+    }
+
+    .preview-stage {
+      min-height: 170px;
+      max-height: 240px;
+      padding: 4px;
+    }
+
+    .video-preview-wrapper,
+    .video-preview-wrapper video {
+      max-height: 230px;
+    }
+
+    .timeline-section {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .timeline-scrubber-track {
+      height: 28px;
+    }
+
+    .timecode-display {
+      font-size: 10px;
+    }
+
+    .controls-bar {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .overlays-panel {
+      padding: 8px 12px;
+    }
+
+    .btn {
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    .aspect-btn {
+      padding: 3px 6px;
+      font-size: 10px;
+    }
+  }
 `;
 var d;
-(function(a) {
-  a.LOAD = "LOAD", a.EXEC = "EXEC", a.FFPROBE = "FFPROBE", a.WRITE_FILE = "WRITE_FILE", a.READ_FILE = "READ_FILE", a.DELETE_FILE = "DELETE_FILE", a.RENAME = "RENAME", a.CREATE_DIR = "CREATE_DIR", a.LIST_DIR = "LIST_DIR", a.DELETE_DIR = "DELETE_DIR", a.ERROR = "ERROR", a.DOWNLOAD = "DOWNLOAD", a.PROGRESS = "PROGRESS", a.LOG = "LOG", a.MOUNT = "MOUNT", a.UNMOUNT = "UNMOUNT";
+(function(r) {
+  r.LOAD = "LOAD", r.EXEC = "EXEC", r.FFPROBE = "FFPROBE", r.WRITE_FILE = "WRITE_FILE", r.READ_FILE = "READ_FILE", r.DELETE_FILE = "DELETE_FILE", r.RENAME = "RENAME", r.CREATE_DIR = "CREATE_DIR", r.LIST_DIR = "LIST_DIR", r.DELETE_DIR = "DELETE_DIR", r.ERROR = "ERROR", r.DOWNLOAD = "DOWNLOAD", r.PROGRESS = "PROGRESS", r.LOG = "LOG", r.MOUNT = "MOUNT", r.UNMOUNT = "UNMOUNT";
 })(d || (d = {}));
 const te = /* @__PURE__ */ (() => {
-  let a = 0;
-  return () => a++;
-})(), ie = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"), re = new Error("called FFmpeg.terminate()");
+  let r = 0;
+  return () => r++;
+})(), ie = new Error("ffmpeg is not loaded, call `await ffmpeg.load()` first"), ae = new Error("called FFmpeg.terminate()");
 var v, O, E, D, L, C, f;
-class ae {
+class re {
   constructor() {
     T(this, v, null);
     /**
@@ -476,10 +547,10 @@ class ae {
             o(this, O)[e](i);
             break;
           case d.LOG:
-            o(this, D).forEach((r) => r(i));
+            o(this, D).forEach((a) => a(i));
             break;
           case d.PROGRESS:
-            o(this, L).forEach((r) => r(i));
+            o(this, L).forEach((a) => a(i));
             break;
           case d.ERROR:
             o(this, E)[e](i);
@@ -491,9 +562,9 @@ class ae {
     /**
      * Generic function to send messages to web worker.
      */
-    T(this, f, ({ type: e, data: t }, i = [], r) => o(this, v) ? new Promise((s, n) => {
+    T(this, f, ({ type: e, data: t }, i = [], a) => o(this, v) ? new Promise((s, n) => {
       const l = te();
-      o(this, v) && o(this, v).postMessage({ id: l, type: e, data: t }, i), o(this, O)[l] = s, o(this, E)[l] = n, r == null || r.addEventListener("abort", () => {
+      o(this, v) && o(this, v).postMessage({ id: l, type: e, data: t }, i), o(this, O)[l] = s, o(this, E)[l] = n, a == null || a.addEventListener("abort", () => {
         n(new DOMException(`Message # ${l} was aborted`, "AbortError"));
       }, { once: !0 });
     }) : Promise.reject(ie));
@@ -573,7 +644,7 @@ class ae {
     u(this, "terminate", () => {
       const e = Object.keys(o(this, E));
       for (const t of e)
-        o(this, E)[t](re), delete o(this, E)[t], delete o(this, O)[t];
+        o(this, E)[t](ae), delete o(this, E)[t], delete o(this, O)[t];
       o(this, v) && (o(this, v).terminate(), U(this, v, null), this.loaded = !1);
     });
     /**
@@ -590,18 +661,18 @@ class ae {
      * @category File System
      */
     u(this, "writeFile", (e, t, { signal: i } = {}) => {
-      const r = [];
-      return t instanceof Uint8Array && r.push(t.buffer), o(this, f).call(this, {
+      const a = [];
+      return t instanceof Uint8Array && a.push(t.buffer), o(this, f).call(this, {
         type: d.WRITE_FILE,
         data: { path: e, data: t }
-      }, r, i);
+      }, a, i);
     });
     u(this, "mount", (e, t, i) => {
-      const r = [];
+      const a = [];
       return o(this, f).call(this, {
         type: d.MOUNT,
         data: { fsType: e, options: t, mountPoint: i }
-      }, r);
+      }, a);
     });
     u(this, "unmount", (e) => {
       const t = [];
@@ -681,35 +752,35 @@ class ae {
 }
 v = new WeakMap(), O = new WeakMap(), E = new WeakMap(), D = new WeakMap(), L = new WeakMap(), C = new WeakMap(), f = new WeakMap();
 var H;
-(function(a) {
-  a.MEMFS = "MEMFS", a.NODEFS = "NODEFS", a.NODERAWFS = "NODERAWFS", a.IDBFS = "IDBFS", a.WORKERFS = "WORKERFS", a.PROXYFS = "PROXYFS";
+(function(r) {
+  r.MEMFS = "MEMFS", r.NODEFS = "NODEFS", r.NODERAWFS = "NODERAWFS", r.IDBFS = "IDBFS", r.WORKERFS = "WORKERFS", r.PROXYFS = "PROXYFS";
 })(H || (H = {}));
-const se = new Error("failed to get response body reader"), oe = new Error("failed to complete download"), ne = "Content-Length", de = (a) => new Promise((e, t) => {
+const se = new Error("failed to get response body reader"), oe = new Error("failed to complete download"), ne = "Content-Length", de = (r) => new Promise((e, t) => {
   const i = new FileReader();
   i.onload = () => {
-    const { result: r } = i;
-    r instanceof ArrayBuffer ? e(new Uint8Array(r)) : e(new Uint8Array());
-  }, i.onerror = (r) => {
+    const { result: a } = i;
+    a instanceof ArrayBuffer ? e(new Uint8Array(a)) : e(new Uint8Array());
+  }, i.onerror = (a) => {
     var s, n;
-    t(Error(`File could not be read! Code=${((n = (s = r == null ? void 0 : r.target) == null ? void 0 : s.error) == null ? void 0 : n.code) || -1}`));
-  }, i.readAsArrayBuffer(a);
-}), le = async (a) => {
+    t(Error(`File could not be read! Code=${((n = (s = a == null ? void 0 : a.target) == null ? void 0 : s.error) == null ? void 0 : n.code) || -1}`));
+  }, i.readAsArrayBuffer(r);
+}), le = async (r) => {
   let e;
-  if (typeof a == "string")
-    /data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(a) ? e = atob(a.split(",")[1]).split("").map((t) => t.charCodeAt(0)) : e = await (await fetch(a)).arrayBuffer();
-  else if (a instanceof URL)
-    e = await (await fetch(a)).arrayBuffer();
-  else if (a instanceof File || a instanceof Blob)
-    e = await de(a);
+  if (typeof r == "string")
+    /data:_data\/([a-zA-Z]*);base64,([^"]*)/.test(r) ? e = atob(r.split(",")[1]).split("").map((t) => t.charCodeAt(0)) : e = await (await fetch(r)).arrayBuffer();
+  else if (r instanceof URL)
+    e = await (await fetch(r)).arrayBuffer();
+  else if (r instanceof File || r instanceof Blob)
+    e = await de(r);
   else
     return new Uint8Array();
   return new Uint8Array(e);
-}, ce = async (a, e) => {
-  var r;
-  const t = await fetch(a);
+}, pe = async (r, e) => {
+  var a;
+  const t = await fetch(r);
   let i;
   try {
-    const s = parseInt(t.headers.get(ne) || "-1"), n = (r = t.body) == null ? void 0 : r.getReader();
+    const s = parseInt(t.headers.get(ne) || "-1"), n = (a = t.body) == null ? void 0 : a.getReader();
     if (!n)
       throw se;
     const l = [];
@@ -719,10 +790,10 @@ const se = new Error("failed to get response body reader"), oe = new Error("fail
       if (w) {
         if (s != -1 && s !== m)
           throw oe;
-        e && e({ url: a, total: s, received: m, delta: h, done: w });
+        e && e({ url: r, total: s, received: m, delta: h, done: w });
         break;
       }
-      l.push(R), m += h, e && e({ url: a, total: s, received: m, delta: h, done: w });
+      l.push(R), m += h, e && e({ url: r, total: s, received: m, delta: h, done: w });
     }
     const y = new Uint8Array(m);
     let S = 0;
@@ -733,11 +804,11 @@ const se = new Error("failed to get response body reader"), oe = new Error("fail
     console.log("failed to send download progress event: ", s), i = await t.arrayBuffer();
   }
   return i;
-}, K = async (a, e, t = !1, i) => {
-  const r = t ? await ce(a, i) : await (await fetch(a)).arrayBuffer(), s = new Blob([r], { type: e });
+}, K = async (r, e, t = !1, i) => {
+  const a = t ? await pe(r, i) : await (await fetch(r)).arrayBuffer(), s = new Blob([a], { type: e });
   return URL.createObjectURL(s);
 };
-class pe {
+class ce {
   constructor() {
     this.ffmpeg = null, this.isLoaded = !1, this.isProcessing = !1, this.loadPromise = null, this.defaultBaseUrls = [
       "/ffmpeg",
@@ -752,24 +823,24 @@ class pe {
       if (typeof window > "u" || typeof Worker > "u")
         return !1;
       try {
-        const t = new ae();
+        const t = new re();
         t.on("log", ({ message: s }) => {
           console.debug("[Senkron FFmpeg WASM]", s);
         });
         const i = e ? [e, ...this.defaultBaseUrls] : this.defaultBaseUrls;
-        let r = !1;
+        let a = !1;
         for (const s of i)
           try {
             const n = await K(`${s}/ffmpeg-core.js`, "text/javascript"), l = await K(`${s}/ffmpeg-core.wasm`, "application/wasm");
             await t.load({
               coreURL: n,
               wasmURL: l
-            }), r = !0;
+            }), a = !0;
             break;
           } catch (n) {
             console.warn(`[Senkron FFmpeg WASM] Could not load core from ${s}:`, n);
           }
-        if (r)
+        if (a)
           return this.ffmpeg = t, this.isLoaded = !0, !0;
       } catch {
         return !1;
@@ -780,7 +851,7 @@ class pe {
   /**
    * Exports the video clip using real WebAssembly FFmpeg, with MediaRecorder fallback.
    */
-  async exportVideo(e, t, i, r, s = [], n, l = "16:9") {
+  async exportVideo(e, t, i, a, s = [], n, l = "16:9") {
     if (this.isProcessing)
       throw new Error("Bir dışa aktarma işlemi zaten yürütülüyor");
     this.isProcessing = !0, n({ percentage: 5, stage: "extracting", message: "WASM FFmpeg motoru hazırlanıyor..." });
@@ -789,7 +860,7 @@ class pe {
         return await this.exportWithWasmFFmpeg(
           e,
           i,
-          r,
+          a,
           s,
           l,
           n
@@ -801,13 +872,13 @@ class pe {
             e,
             t,
             i,
-            r,
+            a,
             s,
             y,
             n
           );
       }
-      return await this.simulateExport(i, r, n);
+      return await this.simulateExport(i, a, n);
     } finally {
       this.isProcessing = !1;
     }
@@ -815,7 +886,7 @@ class pe {
   /**
    * Real in-browser WebAssembly FFmpeg video processing pipeline.
    */
-  async exportWithWasmFFmpeg(e, t, i, r, s, n) {
+  async exportWithWasmFFmpeg(e, t, i, a, s, n) {
     if (!this.ffmpeg)
       throw new Error("FFmpeg WASM instance is not ready");
     const l = e.src || e.currentSrc;
@@ -902,9 +973,9 @@ class pe {
   /**
    * Browser MediaRecorder Canvas Capture Fallback
    */
-  async recordCanvasSegment(e, t, i, r, s, n, l) {
+  async recordCanvasSegment(e, t, i, a, s, n, l) {
     return new Promise((m, y) => {
-      const S = [], w = Math.max(0.1, r - i), R = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", h = new MediaRecorder(n, { mimeType: R });
+      const S = [], w = Math.max(0.1, a - i), R = MediaRecorder.isTypeSupported("video/webm;codecs=vp9") ? "video/webm;codecs=vp9" : MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "video/mp4", h = new MediaRecorder(n, { mimeType: R });
       h.ondataavailable = (g) => {
         g.data && g.data.size > 0 && S.push(g.data);
       }, h.onstop = () => {
@@ -924,7 +995,7 @@ class pe {
           percentage: $,
           stage: "encoding",
           message: `Kareler işleniyor (%${$})...`
-        }), (g >= r || e.ended) && (e.pause(), e.removeEventListener("timeupdate", M), h.stop());
+        }), (g >= a || e.ended) && (e.pause(), e.removeEventListener("timeupdate", M), h.stop());
       };
       e.addEventListener("timeupdate", M), h.start(100), e.play().catch(y);
     });
@@ -933,13 +1004,13 @@ class pe {
    * Headless / Unit Test simulated export
    */
   async simulateExport(e, t, i) {
-    const r = [
+    const a = [
       { percentage: 25, stage: "extracting", msg: "WASM video akışı kırpılıyor..." },
       { percentage: 55, stage: "processing", msg: "Filtre ve metin katmanları uygulanıyor..." },
       { percentage: 85, stage: "encoding", msg: "H.264 MP4 çıktısı derleniyor..." },
       { percentage: 100, stage: "completed", msg: "Dışa aktarım tamamlandı!" }
     ];
-    for (const l of r)
+    for (const l of a)
       await new Promise((m) => setTimeout(m, 40)), i({ percentage: l.percentage, stage: l.stage, message: l.msg });
     const s = new Blob(["senkron-real-wasm-mp4-data"], { type: "video/mp4" }), n = typeof URL < "u" && URL.createObjectURL ? URL.createObjectURL(s) : "blob:senkron/wasm-video";
     return i({
@@ -950,17 +1021,17 @@ class pe {
     }), n;
   }
 }
-var he = Object.defineProperty, p = (a, e, t, i) => {
-  for (var r = void 0, s = a.length - 1, n; s >= 0; s--)
-    (n = a[s]) && (r = n(e, t, r) || r);
-  return r && he(e, t, r), r;
+var he = Object.defineProperty, c = (r, e, t, i) => {
+  for (var a = void 0, s = r.length - 1, n; s >= 0; s--)
+    (n = r[s]) && (a = n(e, t, a) || a);
+  return a && he(e, t, a), a;
 };
 const I = class I extends X {
   constructor() {
     super(...arguments), this.src = "", this.aspectRatio = "16:9", this.theme = "dark", this.autoplay = !1, this.modalMode = !1, this.isPlaying = !1, this.currentTime = 0, this.duration = 10, this.trimStart = 0, this.trimEnd = 10, this.overlays = [], this.newOverlayText = "", this.isExporting = !1, this.exportProgress = {
       percentage: 0,
       stage: "idle"
-    }, this.exportedVideoUrl = null, this.fileName = "", this.isDragging = !1, this.ffmpegService = new pe(), this.animationFrameId = null, this.renderOverlays = () => {
+    }, this.exportedVideoUrl = null, this.fileName = "", this.isDragging = !1, this.ffmpegService = new ce(), this.animationFrameId = null, this.renderOverlays = () => {
       const e = this.canvasEl;
       if (!e || typeof e.getContext != "function") return;
       const t = e.getContext("2d");
@@ -969,8 +1040,8 @@ const I = class I extends X {
         for (const i of this.overlays)
           if (this.currentTime >= i.startTime && this.currentTime <= i.endTime) {
             t.save(), t.fillStyle = i.color || "#ffffff", t.font = `bold ${i.fontSize || 24}px ${i.fontFamily || "sans-serif"}`, t.textAlign = "center", t.shadowColor = "rgba(0, 0, 0, 0.9)", t.shadowBlur = 8, t.shadowOffsetX = 2, t.shadowOffsetY = 2;
-            const r = e.width * i.x / 100, s = e.height * i.y / 100;
-            t.fillText(i.text, r, s), t.restore();
+            const a = e.width * i.x / 100, s = e.height * i.y / 100;
+            t.fillText(i.text, a, s), t.restore();
           }
         this.isPlaying && (this.animationFrameId = requestAnimationFrame(this.renderOverlays));
       }
@@ -1143,15 +1214,15 @@ const I = class I extends X {
       if (t && t.videoWidth && t.videoHeight)
         e.width = t.videoWidth, e.height = t.videoHeight;
       else {
-        const [i, r] = this.aspectRatio.split(":").map(Number), s = 640, n = s * (r || 9) / (i || 16);
+        const [i, a] = this.aspectRatio.split(":").map(Number), s = 640, n = s * (a || 9) / (i || 16);
         e.width = s, e.height = n;
       }
       this.renderOverlays();
     }
   }
   formatTime(e) {
-    const t = Math.floor(e / 60), i = Math.floor(e % 60), r = Math.floor(e % 1 * 10);
-    return `${t.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${r}`;
+    const t = Math.floor(e / 60), i = Math.floor(e % 60), a = Math.floor(e % 1 * 10);
+    return `${t.toString().padStart(2, "0")}:${i.toString().padStart(2, "0")}.${a}`;
   }
   render() {
     const e = this.duration > 0 ? this.currentTime / this.duration * 100 : 0, t = this.duration > 0 ? this.trimStart / this.duration * 100 : 0, i = this.duration > 0 ? (this.trimEnd - this.trimStart) / this.duration * 100 : 100;
@@ -1188,12 +1259,12 @@ const I = class I extends X {
             <!-- Aspect Ratio Selector -->
             <div class="aspect-selector">
               ${["16:9", "9:16", "1:1", "4:5"].map(
-      (r) => b`
+      (a) => b`
                   <button
-                    class="aspect-btn ${this.aspectRatio === r ? "active" : ""}"
-                    @click=${() => this.setAspectRatio(r)}
+                    class="aspect-btn ${this.aspectRatio === a ? "active" : ""}"
+                    @click=${() => this.setAspectRatio(a)}
                   >
-                    ${r}
+                    ${a}
                   </button>
                 `
     )}
@@ -1342,13 +1413,13 @@ const I = class I extends X {
             ></div>
 
             <!-- Overlays Indicators -->
-            ${this.overlays.map((r) => {
-      const s = r.startTime / this.duration * 100, n = (r.endTime - r.startTime) / this.duration * 100;
+            ${this.overlays.map((a) => {
+      const s = a.startTime / this.duration * 100, n = (a.endTime - a.startTime) / this.duration * 100;
       return b`
                 <div
                   class="timeline-overlay-marker"
                   style="left: ${s}%; width: ${n}%;"
-                  title="${r.text}"
+                  title="${a.text}"
                 ></div>
               `;
     })}
@@ -1366,8 +1437,8 @@ const I = class I extends X {
               class="overlay-input"
               placeholder="Videoya metin katmanı ekle (örn: #TEKNOFEST2026)..."
               .value=${this.newOverlayText}
-              @input=${(r) => this.newOverlayText = r.target.value}
-              @keydown=${(r) => r.key === "Enter" && this.addOverlay()}
+              @input=${(a) => this.newOverlayText = a.target.value}
+              @keydown=${(a) => a.key === "Enter" && this.addOverlay()}
             />
             <button class="btn" @click=${this.addOverlay} ?disabled=${!this.src}>
               + Metin Ekle
@@ -1377,10 +1448,10 @@ const I = class I extends X {
           ${this.overlays.length > 0 ? b`
                 <div class="overlays-list">
                   ${this.overlays.map(
-      (r) => b`
+      (a) => b`
                       <div class="overlay-tag">
-                        <span>"${r.text}" (${this.formatTime(r.startTime)} - ${this.formatTime(r.endTime)})</span>
-                        <button class="overlay-tag-delete" @click=${() => this.removeOverlay(r.id)}>
+                        <span>"${a.text}" (${this.formatTime(a.startTime)} - ${this.formatTime(a.endTime)})</span>
+                        <button class="overlay-tag-delete" @click=${() => this.removeOverlay(a.id)}>
                           ✕
                         </button>
                       </div>
@@ -1394,62 +1465,62 @@ const I = class I extends X {
   }
 };
 I.styles = q;
-let c = I;
-p([
+let p = I;
+c([
   k({ type: String })
-], c.prototype, "src");
-p([
+], p.prototype, "src");
+c([
   k({ type: String, attribute: "aspect-ratio" })
-], c.prototype, "aspectRatio");
-p([
+], p.prototype, "aspectRatio");
+c([
   k({ type: String })
-], c.prototype, "theme");
-p([
+], p.prototype, "theme");
+c([
   k({ type: Boolean })
-], c.prototype, "autoplay");
-p([
+], p.prototype, "autoplay");
+c([
   k({ type: Boolean, attribute: "modal-mode" })
-], c.prototype, "modalMode");
-p([
+], p.prototype, "modalMode");
+c([
   x()
-], c.prototype, "isPlaying");
-p([
+], p.prototype, "isPlaying");
+c([
   x()
-], c.prototype, "currentTime");
-p([
+], p.prototype, "currentTime");
+c([
   x()
-], c.prototype, "duration");
-p([
+], p.prototype, "duration");
+c([
   x()
-], c.prototype, "trimStart");
-p([
+], p.prototype, "trimStart");
+c([
   x()
-], c.prototype, "trimEnd");
-p([
+], p.prototype, "trimEnd");
+c([
   x()
-], c.prototype, "overlays");
-p([
+], p.prototype, "overlays");
+c([
   x()
-], c.prototype, "newOverlayText");
-p([
+], p.prototype, "newOverlayText");
+c([
   x()
-], c.prototype, "isExporting");
-p([
+], p.prototype, "isExporting");
+c([
   x()
-], c.prototype, "exportProgress");
-p([
+], p.prototype, "exportProgress");
+c([
   x()
-], c.prototype, "exportedVideoUrl");
-p([
+], p.prototype, "exportedVideoUrl");
+c([
   x()
-], c.prototype, "fileName");
-p([
+], p.prototype, "fileName");
+c([
   x()
-], c.prototype, "isDragging");
-var ue = Object.defineProperty, P = (a, e, t, i) => {
-  for (var r = void 0, s = a.length - 1, n; s >= 0; s--)
-    (n = a[s]) && (r = n(e, t, r) || r);
-  return r && ue(e, t, r), r;
+], p.prototype, "isDragging");
+var ue = Object.defineProperty, P = (r, e, t, i) => {
+  for (var a = void 0, s = r.length - 1, n; s >= 0; s--)
+    (n = r[s]) && (a = n(e, t, a) || a);
+  return a && ue(e, t, a), a;
 };
 const z = class z extends X {
   constructor() {
@@ -1534,9 +1605,9 @@ P([
 P([
   k({ type: String })
 ], A.prototype, "theme");
-typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", c), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", A));
+typeof window < "u" && (customElements.get("senkron-video-editor") || customElements.define("senkron-video-editor", p), customElements.get("senkron-video-editor-modal") || customElements.define("senkron-video-editor-modal", A));
 export {
-  pe as FFmpegService,
-  c as SenkronVideoEditor,
+  ce as FFmpegService,
+  p as SenkronVideoEditor,
   A as SenkronVideoEditorModal
 };

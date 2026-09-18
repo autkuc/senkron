@@ -131,8 +131,9 @@ class R {
     y(this, "activeLocalSlots", 0);
     y(this, "isLocalHealthy", !0);
     y(this, "lastHealthCheckTime", 0);
+    const a = process.env.LOCAL_LLM_BASE_URL || (process.env.NODE_ENV === "test" ? "http://localhost:11434/v1" : "https://arapronaldosui--senkron-turkish-llm-service-api.modal.run");
     this.config = {
-      localBaseUrl: (e == null ? void 0 : e.localBaseUrl) || process.env.LOCAL_LLM_BASE_URL || "http://localhost:11434/v1",
+      localBaseUrl: (e == null ? void 0 : e.localBaseUrl) || a,
       localModelName: (e == null ? void 0 : e.localModelName) || process.env.LOCAL_LLM_MODEL || "senkron-turkish-llama3.2:3b",
       maxLocalConcurrency: (e == null ? void 0 : e.maxLocalConcurrency) ?? Number(process.env.MAX_LOCAL_CONCURRENCY || 2),
       localTimeoutMs: (e == null ? void 0 : e.localTimeoutMs) ?? Number(process.env.LOCAL_TIMEOUT_MS || 6e4),
@@ -258,7 +259,7 @@ class R {
       });
       if (!d.ok)
         throw new Error(`External API returned status ${d.status}`);
-      const p = await d.json(), k = ((m = (i = (o = p.choices) == null ? void 0 : o[0]) == null ? void 0 : i.message) == null ? void 0 : m.content) || "", g = ((h = p.usage) == null ? void 0 : h.prompt_tokens) || Math.ceil(e.map((E) => E.content).join(" ").length / 4), b = ((c = p.usage) == null ? void 0 : c.completion_tokens) || Math.ceil(k.length / 4), x = Date.now() - t;
+      const p = await d.json(), k = ((m = (i = (o = p.choices) == null ? void 0 : o[0]) == null ? void 0 : i.message) == null ? void 0 : m.content) || "", g = ((h = p.usage) == null ? void 0 : h.prompt_tokens) || Math.ceil(e.map((x) => x.content).join(" ").length / 4), b = ((c = p.usage) == null ? void 0 : c.completion_tokens) || Math.ceil(k.length / 4), E = Date.now() - t;
       return {
         rawText: k,
         tokenUsage: {
@@ -270,7 +271,7 @@ class R {
         telemetry: {
           routeUsed: "external",
           routeReason: n,
-          latencyMs: x,
+          latencyMs: E,
           activeLocalSlots: this.activeLocalSlots,
           maxLocalConcurrency: this.config.maxLocalConcurrency,
           fallbackTriggered: r
@@ -570,14 +571,15 @@ ${u}`.trim());
     return (r.includes("yapay zeka") || r.includes("ai")) && t.push("#YapayZeka"), (r.includes("yazılım") || r.includes("kod")) && t.push("#Yazılım"), (r.includes("video") || r.includes("film")) && t.push("#Video"), t.length < 3 && t.push("#Teknoloji", "#Gündem"), Array.from(new Set(t)).slice(0, 4);
   }
 }
-class G {
+class V {
   constructor(e) {
     y(this, "config");
     y(this, "router");
     y(this, "pipeline");
+    const a = process.env.LLM_BASE_URL || process.env.LOCAL_LLM_BASE_URL || (process.env.NODE_ENV === "test" ? "http://localhost:11434/v1" : "https://arapronaldosui--senkron-turkish-llm-service-api.modal.run");
     this.config = {
       type: process.env.LLM_BACKEND_TYPE || "internal",
-      baseUrl: process.env.LLM_BASE_URL || "http://localhost:11434/v1",
+      baseUrl: (e == null ? void 0 : e.baseUrl) || a,
       apiKey: process.env.LLM_API_KEY || "",
       modelName: process.env.LLM_MODEL_NAME || "senkron-turkish-llama3.2:3b",
       maxLocalConcurrency: (e == null ? void 0 : e.maxLocalConcurrency) ?? Number(process.env.MAX_LOCAL_CONCURRENCY || 2),
@@ -635,7 +637,7 @@ class G {
   }
 }
 export {
-  G as LLMGateway,
+  V as LLMGateway,
   Y as SYSTEM_PROMPT,
   R as SmartRouter,
   j as TwoStageGenerator,

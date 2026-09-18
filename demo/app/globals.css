@@ -36,6 +36,15 @@ body {
   background: #334155;
 }
 
+/* Hide scrollbar utility for clean mobile carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .text-gradient {
   background: linear-gradient(90deg, #07d0e0 0%, #324bff 100%);
   -webkit-background-clip: text;

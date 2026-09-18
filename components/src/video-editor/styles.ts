@@ -425,4 +425,75 @@ export const videoEditorStyles = css`
     background: #334155;
     color: #ffffff;
   }
+
+  @media (max-width: 640px) {
+    .modal-backdrop {
+      padding: 6px;
+    }
+
+    .modal-dialog {
+      max-height: 96vh;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-container {
+      min-height: 0;
+      max-height: calc(96vh - 48px);
+      overflow-y: auto;
+    }
+
+    .editor-header {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .editor-title {
+      font-size: 12px;
+    }
+
+    .preview-stage {
+      min-height: 170px;
+      max-height: 240px;
+      padding: 4px;
+    }
+
+    .video-preview-wrapper,
+    .video-preview-wrapper video {
+      max-height: 230px;
+    }
+
+    .timeline-section {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .timeline-scrubber-track {
+      height: 28px;
+    }
+
+    .timecode-display {
+      font-size: 10px;
+    }
+
+    .controls-bar {
+      padding: 8px 12px;
+      gap: 6px;
+    }
+
+    .overlays-panel {
+      padding: 8px 12px;
+    }
+
+    .btn {
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    .aspect-btn {
+      padding: 3px 6px;
+      font-size: 10px;
+    }
+  }
 `;

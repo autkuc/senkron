@@ -3,7 +3,7 @@ import { TwoStageGenerator } from './two-stage-generator';
 import { SmartRouter } from '../router/smart-router';
 
 describe('TwoStageGenerator Turkish Pipeline', () => {
-  const router = new SmartRouter();
+  const router = new SmartRouter({ localBaseUrl: 'http://127.0.0.1:11434/v1', localTimeoutMs: 200 });
   const generator = new TwoStageGenerator(router);
 
   it('generates multiple candidates with derived (non-constant) scores', async () => {
@@ -52,7 +52,7 @@ describe('TwoStageGenerator Turkish Pipeline', () => {
   });
 
   it('refuses to fabricate output when no LLM is reachable and simulation is disabled (production)', async () => {
-    const strictRouter = new SmartRouter({ allowSimulation: false });
+    const strictRouter = new SmartRouter({ localBaseUrl: 'http://127.0.0.1:11434/v1', localTimeoutMs: 200, allowSimulation: false });
     const strictGen = new TwoStageGenerator(strictRouter, { allowSimulation: false });
     await expect(
       strictGen.generateCandidates('Herhangi bir konu', 'viral', 2)

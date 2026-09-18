@@ -35,30 +35,31 @@ export const BadgeModal: React.FC<BadgeModalProps> = ({
   const unlockedCount = badges.filter((b) => b.unlockedAt).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in-0 duration-200">
-      <div className="relative w-full max-w-2xl bg-[#090d16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/75 backdrop-blur-md animate-in fade-in-0 duration-200">
+      <div className="relative w-full max-w-2xl bg-[#090d16] border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-xl shadow-inner">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 sm:pb-4 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-lg sm:text-xl shadow-inner flex-shrink-0">
               🏅
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
-                NSosyal Rozet & Ödül Sistemi
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono">
-                  {unlockedCount} / {badges.length} Açıldı
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold text-slate-100 flex items-center flex-wrap gap-1.5 sm:gap-2">
+                <span>NSosyal Rozet & Ödül Sistemi</span>
+                <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-semibold">
+                  {unlockedCount} / {badges.length}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
-                Platform ile etkileşime geçerek tecrübe puanı (XP) ve özel rozetler kazanın.
+              <p className="text-[11px] sm:text-xs text-slate-400 truncate sm:whitespace-normal">
+                Gönderi paylaşarak ve etkileşime geçerek XP ve rozetler kazanın.
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800/60 hover:bg-slate-850 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors text-sm"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-800/60 hover:bg-slate-850 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors text-xs sm:text-sm flex-shrink-0"
+            aria-label="Kapat"
           >
             ✕
           </button>

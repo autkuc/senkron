@@ -235,20 +235,20 @@ export default function NSosyalDemoPage() {
 
       {/* Offline Alert Sticky Banner */}
       {isOffline && (
-        <div className="fixed bottom-4 right-4 z-40 px-3.5 py-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center gap-2 backdrop-blur-md shadow-lg">
+        <div className="fixed bottom-16 md:bottom-4 right-4 z-40 px-3.5 py-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center gap-2 backdrop-blur-md shadow-lg animate-in slide-in-from-bottom-2">
           <span className="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
-          <span>Çevrimdışı Mod (Offline)</span>
+          <span className="hidden xs:inline">Çevrimdışı</span>
           <button
             onClick={() => setIsDinoModalOpen(true)}
-            className="ml-2 px-2 py-0.5 rounded bg-red-500/30 hover:bg-red-500/50 text-[11px] underline"
+            className="ml-1 px-2 py-0.5 rounded bg-red-500/30 hover:bg-red-500/50 text-[11px] underline"
           >
-            Dino Oyna 🦖
+            Dino 🦖
           </button>
         </div>
       )}
 
       {/* Main 3-Column Container */}
-      <div className="w-full max-w-7xl flex justify-between">
+      <div className="w-full max-w-7xl flex justify-center md:justify-start lg:justify-between">
         {/* Column 1: Left Navigation Sidebar */}
         <Sidebar
           onOpenComposer={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -258,10 +258,21 @@ export default function NSosyalDemoPage() {
         />
 
         {/* Column 2: Center Main Feed */}
-        <main className="flex-1 max-w-2xl min-h-screen border-r border-slate-800/80">
+        <main className="w-full flex-1 max-w-2xl min-h-screen border-r border-slate-800/80 pb-20 md:pb-6">
           {/* Header */}
-          <header className="sticky top-0 z-20 bg-[#090d16]/90 backdrop-blur-md px-4 py-3.5 border-b border-slate-800/80 flex items-center justify-between">
-            <h1 className="text-base font-bold text-slate-100">Ana Sayfa</h1>
+          <header className="sticky top-0 z-20 bg-[#090d16]/90 backdrop-blur-md px-3.5 sm:px-4 py-3 border-b border-slate-800/80 flex items-center justify-between">
+            {/* Desktop Page Title / Mobile Brand */}
+            <div className="flex items-center gap-2.5">
+              {/* Mobile Brand Logo */}
+              <div className="flex md:hidden items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center font-bold text-white text-sm shadow-sm">
+                  N
+                </div>
+                <span className="font-bold text-base text-white">NSosyal</span>
+              </div>
+              <h1 className="hidden md:block text-base font-bold text-slate-100">Ana Sayfa</h1>
+            </div>
+
             <div className="flex items-center gap-2">
               {/* Quick Dino Offline Game Button */}
               <button
@@ -288,22 +299,26 @@ export default function NSosyalDemoPage() {
           <StoryBar />
 
           {/* Post Composer Area */}
-          <PostComposer
-            onOpenVideoModal={() => setIsVideoModalOpen(true)}
-            onOpenAiModal={() => setIsAiModalOpen(true)}
-            attachedVideo={attachedVideo}
-            onRemoveVideo={() => setAttachedVideo(null)}
-            postText={postText}
-            onPostTextChange={setPostText}
-            onPublish={handlePublishPost}
-          />
+          <div className="p-3 sm:p-4">
+            <PostComposer
+              onOpenVideoModal={() => setIsVideoModalOpen(true)}
+              onOpenAiModal={() => setIsAiModalOpen(true)}
+              attachedVideo={attachedVideo}
+              onRemoveVideo={() => setAttachedVideo(null)}
+              postText={postText}
+              onPostTextChange={setPostText}
+              onPublish={handlePublishPost}
+            />
+          </div>
 
           {/* Feed Posts */}
-          <FeedList
-            posts={posts}
-            onToggleLike={handleToggleLike}
-            onToggleRepost={handleToggleRepost}
-          />
+          <div className="px-3 sm:px-4">
+            <FeedList
+              posts={posts}
+              onToggleLike={handleToggleLike}
+              onToggleRepost={handleToggleRepost}
+            />
+          </div>
         </main>
 
         {/* Column 3: Right Sidebar */}
@@ -317,6 +332,66 @@ export default function NSosyalDemoPage() {
           onOpenDinoGame={() => setIsDinoModalOpen(true)}
         />
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Visible on < 768px) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 bg-[#090d16]/95 backdrop-blur-lg border-t border-slate-800/90 px-4 py-2 flex items-center justify-around md:hidden shadow-2xl">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex flex-col items-center gap-0.5 text-sky-400 py-1 px-3"
+          title="Ana Sayfa"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
+          <span className="text-[10px] font-medium">Akış</span>
+        </button>
+
+        <button
+          onClick={() => showToast('Trend konular sağ panelde listeleniyor')}
+          className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 py-1 px-3"
+          title="Keşfet"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.3-4.3" />
+          </svg>
+          <span className="text-[10px] font-medium">Keşfet</span>
+        </button>
+
+        {/* Mobile Central Action Button */}
+        <button
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="w-10 h-10 -mt-3 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 active:scale-95 transition-all"
+          title="Gönderi Paylaş"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => setIsBadgeModalOpen(true)}
+          className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-amber-300 py-1 px-3 relative"
+          title="Rozetlerim"
+        >
+          <span className="text-base">🏅</span>
+          <span className="text-[10px] font-medium">Rozetler</span>
+          {unlockedBadges.length > 0 && (
+            <span className="absolute top-0.5 right-2 w-2 h-2 rounded-full bg-amber-400" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setIsDinoModalOpen(true)}
+          className="flex flex-col items-center gap-0.5 text-slate-400 hover:text-rose-400 py-1 px-3"
+          title="Dino Oyunu"
+        >
+          <span className="text-base">🦖</span>
+          <span className="text-[10px] font-medium">Dino</span>
+        </button>
+      </nav>
 
       {/* WASM Video Editor Modal */}
       <SenkronVideoEditorModal

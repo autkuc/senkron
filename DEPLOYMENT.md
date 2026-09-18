@@ -73,10 +73,7 @@ sudo npm install -g pm2
 git clone <your-repo-url> /opt/senkron
 cd /opt/senkron
 
-# Configure environment variables
-cp .env.example .env.local
-
-# Install dependencies and build
+# Install dependencies and build (defaults connect directly to Modal GPU)
 npm install
 npm run build
 ```

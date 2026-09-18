@@ -276,7 +276,52 @@
     background: #334155;
     color: #ffffff;
   }
-`;var y=Object.defineProperty,l=(p,e,n,i)=>{for(var a=void 0,r=p.length-1,o;r>=0;r--)(o=p[r])&&(a=o(e,n,a)||a);return a&&y(e,n,a),a};const g={nsosyal:500},h=class h extends t.i$1{constructor(){super(...arguments),this.apiUrl="/api/ai/generate",this.graphqlUrl="",this.defaultTone="viral",this.topic="",this.tone="viral",this.isGenerating=!1,this.errorMessage=null,this.copied=!1,this.drafts={nsosyal:{platform:"nsosyal",content:"",hashtags:[],characterCount:0,maxCharacters:g.nsosyal}},this.handleApplyToPost=()=>{const e=this.drafts.nsosyal;if(!e.content)return;const n=e.hashtags.length?`
+
+  @media (max-width: 640px) {
+    .modal-backdrop {
+      padding: 6px;
+    }
+
+    .modal-dialog {
+      max-height: 96vh;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .generator-container {
+      min-height: 0;
+      max-height: calc(96vh - 48px);
+      overflow-y: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .control-panel {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+
+    .preview-panel {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+
+    .text-area {
+      min-height: 60px;
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+
+    .tone-chip {
+      padding: 4px 8px;
+      font-size: 10px;
+    }
+
+    .modal-topbar {
+      padding: 10px 14px;
+    }
+  }
+`;var m=Object.defineProperty,l=(p,e,n,i)=>{for(var a=void 0,r=p.length-1,o;r>=0;r--)(o=p[r])&&(a=o(e,n,a)||a);return a&&m(e,n,a),a};const g={nsosyal:500},h=class h extends t.i$1{constructor(){super(...arguments),this.apiUrl="/api/ai/generate",this.graphqlUrl="",this.defaultTone="viral",this.topic="",this.tone="viral",this.isGenerating=!1,this.errorMessage=null,this.copied=!1,this.drafts={nsosyal:{platform:"nsosyal",content:"",hashtags:[],characterCount:0,maxCharacters:g.nsosyal}},this.handleApplyToPost=()=>{const e=this.drafts.nsosyal;if(!e.content)return;const n=e.hashtags.length?`
 
 ${e.hashtags.join(" ")}`:"",i=`${e.content}${n}`.trim(),a={platform:"nsosyal",content:e.content,hashtags:e.hashtags,fullText:i};this.dispatchEvent(new CustomEvent("senkron:post-applied",{detail:a,bubbles:!0,composed:!0}))},this.handleCopy=async()=>{const e=this.drafts.nsosyal;if(!e.content)return;const n=e.hashtags.length?`
 
@@ -399,7 +444,7 @@ ${e.hashtags.join(" ")}`:"",i=`${e.content}${n}`.trim(),a=i.length>e.maxCharacte
           </div>
         </div>
       </div>
-    `}};h.styles=u;let s=h;l([t.n({type:String,attribute:"api-url"})],s.prototype,"apiUrl");l([t.n({type:String,attribute:"graphql-url"})],s.prototype,"graphqlUrl");l([t.n({type:String,attribute:"default-tone"})],s.prototype,"defaultTone");l([t.n({type:String})],s.prototype,"topic");l([t.r()],s.prototype,"tone");l([t.r()],s.prototype,"isGenerating");l([t.r()],s.prototype,"errorMessage");l([t.r()],s.prototype,"copied");l([t.r()],s.prototype,"drafts");var m=Object.defineProperty,c=(p,e,n,i)=>{for(var a=void 0,r=p.length-1,o;r>=0;r--)(o=p[r])&&(a=o(e,n,a)||a);return a&&m(e,n,a),a};const f=class f extends t.i$1{constructor(){super(...arguments),this.a11y=new t.ModalA11y(this,()=>this.closeModal()),this.open=!1,this.apiUrl="",this.defaultTone="viral",this.topic="",this.handleBackdropClick=e=>{e.target.classList.contains("modal-backdrop")&&this.closeModal()},this.handlePostApplied=e=>{this.dispatchEvent(new CustomEvent("senkron:post-applied",{detail:e.detail,bubbles:!0,composed:!0})),this.closeModal()}}updated(e){e.has("open")&&this.a11y.openChanged(this.open)}openModal(){this.open=!0}closeModal(){this.open=!1,this.dispatchEvent(new CustomEvent("senkron:modal-close",{bubbles:!0,composed:!0}))}render(){return this.open?t.b`
+    `}};h.styles=u;let s=h;l([t.n({type:String,attribute:"api-url"})],s.prototype,"apiUrl");l([t.n({type:String,attribute:"graphql-url"})],s.prototype,"graphqlUrl");l([t.n({type:String,attribute:"default-tone"})],s.prototype,"defaultTone");l([t.n({type:String})],s.prototype,"topic");l([t.r()],s.prototype,"tone");l([t.r()],s.prototype,"isGenerating");l([t.r()],s.prototype,"errorMessage");l([t.r()],s.prototype,"copied");l([t.r()],s.prototype,"drafts");var y=Object.defineProperty,c=(p,e,n,i)=>{for(var a=void 0,r=p.length-1,o;r>=0;r--)(o=p[r])&&(a=o(e,n,a)||a);return a&&y(e,n,a),a};const f=class f extends t.i$1{constructor(){super(...arguments),this.a11y=new t.ModalA11y(this,()=>this.closeModal()),this.open=!1,this.apiUrl="",this.defaultTone="viral",this.topic="",this.handleBackdropClick=e=>{e.target.classList.contains("modal-backdrop")&&this.closeModal()},this.handlePostApplied=e=>{this.dispatchEvent(new CustomEvent("senkron:post-applied",{detail:e.detail,bubbles:!0,composed:!0})),this.closeModal()}}updated(e){e.has("open")&&this.a11y.openChanged(this.open)}openModal(){this.open=!0}closeModal(){this.open=!1,this.dispatchEvent(new CustomEvent("senkron:modal-close",{bubbles:!0,composed:!0}))}render(){return this.open?t.b`
       <div class="modal-backdrop" @click=${this.handleBackdropClick}>
         <div
           class="modal-dialog"

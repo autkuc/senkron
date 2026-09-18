@@ -104,15 +104,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside className="w-64 flex-shrink-0 flex flex-col justify-between py-6 px-4 border-r border-slate-800/80 min-h-screen sticky top-0 bg-[#090d16]">
+    <aside className="hidden md:flex md:w-16 lg:w-64 flex-shrink-0 flex-col justify-between py-5 px-2 lg:px-4 border-r border-slate-800/80 min-h-screen sticky top-0 bg-[#090d16] transition-all duration-200 z-20">
       {/* Brand & Nav */}
       <div className="space-y-6">
         {/* NSosyal Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 px-2 group">
-          <div className="w-9 h-9 rounded-xl bg-sky-600 flex items-center justify-center font-bold text-white text-base shadow-sm">
+        <Link href="/" className="flex items-center justify-center lg:justify-start gap-3 px-1 lg:px-2 group">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center font-bold text-white text-base shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
             N
           </div>
-          <div>
+          <div className="hidden lg:block">
             <div className="font-bold text-lg tracking-tight text-white">
               NSosyal
             </div>
@@ -126,26 +126,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={idx}
               onClick={item.onClick}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              title={item.label}
+              className={`w-full flex items-center justify-center lg:justify-between px-2.5 lg:px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors group relative ${
                 item.active
                   ? 'bg-slate-800/80 text-white border border-slate-700/60 font-semibold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-850/50'
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className={item.active ? 'text-sky-400' : 'text-slate-400'}>
+                <span className={`flex-shrink-0 ${item.active ? 'text-sky-400' : 'text-slate-400 group-hover:text-slate-200'}`}>
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                <span className="hidden lg:inline">{item.label}</span>
               </div>
               {item.badge && (
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    item.badgeColor || 'bg-sky-600 text-white'
-                  }`}
-                >
-                  {item.badge}
-                </span>
+                <>
+                  {/* Full Badge Pill on Large Screens */}
+                  <span
+                    className={`hidden lg:inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      item.badgeColor || 'bg-sky-600 text-white'
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                  {/* Badge Notification Indicator Dot on Tablet Screens */}
+                  <span
+                    className="lg:hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-sky-400 ring-2 ring-[#090d16]"
+                    title={item.badge}
+                  />
+                </>
               )}
             </button>
           ))}
@@ -154,22 +163,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Primary 'Gönderi Paylaş' Button */}
         <button
           onClick={onOpenComposer}
-          className="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 active:scale-98"
+          title="Gönderi Paylaş"
+          className="w-full py-2.5 px-2 lg:px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-sky-500/10"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          <span>Gönderi Paylaş</span>
+          <span className="hidden lg:inline">Gönderi Paylaş</span>
         </button>
       </div>
 
       {/* User Card */}
-      <div className="p-2.5 rounded-xl bg-[#0f1624] border border-slate-800 flex items-center justify-between mt-auto">
+      <div className="p-2 lg:p-2.5 rounded-xl bg-[#0f1624] border border-slate-800 flex items-center justify-center lg:justify-between mt-auto">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-sky-600 flex items-center justify-center font-bold text-xs text-white">
+          <div
+            className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center font-bold text-xs text-white flex-shrink-0 cursor-pointer"
+            onClick={onOpenBadges}
+            title="Kaan Arslan (@kaan_dev)"
+          >
             KA
           </div>
-          <div className="flex flex-col">
+          <div className="hidden lg:flex flex-col">
             <span className="text-xs font-semibold text-slate-200">Kaan Arslan</span>
             <span className="text-[11px] text-slate-500 font-mono">@kaan_dev</span>
           </div>
@@ -177,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <button
           onClick={onOpenBadges}
-          className="text-amber-400 hover:text-amber-300 text-sm p-1 rounded-lg hover:bg-slate-800 transition-colors"
+          className="hidden lg:block text-amber-400 hover:text-amber-300 text-sm p-1 rounded-lg hover:bg-slate-800 transition-colors"
           title="Rozetlerim"
         >
           🏅

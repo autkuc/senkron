@@ -19,8 +19,14 @@ export class SmartRouter {
   private lastHealthCheckTime: number = 0;
 
   constructor(config?: Partial<SmartRouterConfig>) {
+    const defaultLocalUrl =
+      process.env.LOCAL_LLM_BASE_URL ||
+      (process.env.NODE_ENV === 'test'
+        ? 'http://localhost:11434/v1'
+        : 'https://arapronaldosui--senkron-turkish-llm-service-api.modal.run');
+
     this.config = {
-      localBaseUrl: config?.localBaseUrl || process.env.LOCAL_LLM_BASE_URL || 'http://localhost:11434/v1',
+      localBaseUrl: config?.localBaseUrl || defaultLocalUrl,
       localModelName: config?.localModelName || process.env.LOCAL_LLM_MODEL || 'senkron-turkish-llama3.2:3b',
       maxLocalConcurrency: config?.maxLocalConcurrency ?? Number(process.env.MAX_LOCAL_CONCURRENCY || 2),
       localTimeoutMs: config?.localTimeoutMs ?? Number(process.env.LOCAL_TIMEOUT_MS || 60000),
