@@ -247,6 +247,38 @@ export function NSosyalComposer() {
 
 ---
 
+## 🚀 Quickstart & Monorepo Build
+
+Senkron is structured as an npm workspace monorepo with single-command builds and deployment support:
+
+```bash
+# 1. Install all dependencies across workspaces
+npm install
+
+# 2. Build all packages (AI engine, Web Components, Backend API, Next.js Standalone Demo)
+npm run build
+
+# 3. Start development or production services
+npm start              # Starts Next.js demo on http://localhost:3000
+npm run start:backend  # Starts Express GraphQL API on http://localhost:4000
+
+# 4. Run all monorepo automated test suites
+npm test
+```
+
+### 🐳 Docker & Cloud Deployment
+
+Launch the full production stack with one command:
+```bash
+docker compose up -d --build
+```
+- **Web Interface & API:** `http://localhost:3000` (Next.js 14 Standalone Container)
+- **Backend API & GraphQL:** `http://localhost:4000` (Alpine Node 20 + Native FFmpeg)
+
+For comprehensive guides on Vercel, Railway, Render, Fly.io, and VPS deployments, see [**`DEPLOYMENT.md`**](./DEPLOYMENT.md).
+
+---
+
 ## ⚡ Serverless AI Fine-Tuning & Deployment (Modal)
 
 Senkron includes a turnkey Modal training and serving pipeline:

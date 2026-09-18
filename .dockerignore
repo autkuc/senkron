@@ -1,0 +1,17 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+node_modules
+*/node_modules
+*/*/node_modules
+.next
+*/.next
+dist
+*/dist
+docs
+coverage
+*.log
+.env.local
+.DS_Store
