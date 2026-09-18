@@ -62,6 +62,15 @@ Senkron solves the two largest cost and infrastructure bottlenecks in social pla
 
 ```
 Senkron/
+├── package.json         # Root monorepo orchestration & npm workspaces
+├── docker-compose.yml   # Multi-container orchestration (Web + Backend)
+├── Dockerfile           # Multi-stage production container for Next.js Web App
+├── Dockerfile.backend   # Multi-stage production container for Backend microservice
+├── vercel.json          # 1-Click Vercel cloud deployment config
+├── .env.example         # Production environment variables template
+├── DEPLOYMENT.md        # Comprehensive deployment & production operations manual
+├── scripts/             # Automated CI/CD and deployment build pipelines
+│   └── build.sh
 ├── components/          # Standalone UI Web Components & React wrappers (@senkron/components)
 │   ├── src/
 │   │   ├── video-editor/     # Lit Web Component for in-browser WASM FFmpeg video editing
@@ -249,33 +258,81 @@ export function NSosyalComposer() {
 
 ## 🚀 Quickstart & Monorepo Build
 
-Senkron is structured as an npm workspace monorepo with single-command builds and deployment support:
+Senkron is organized as an **npm workspace monorepo** with coordinated multi-package builds, tests, and deployment pipelines.
+
+### 1. Prerequisites
+- **Node.js**: `v20.x` or higher
+- **npm**: `v10.x` or higher
+- *(Optional)* **Docker & Docker Compose**: For containerized deployment
+
+### 2. Monorepo Build Pipeline
+Install dependencies and build all packages in topological order (`@senkron/ai` → `@senkron/components` → `@senkron/backend` → `senkron-demo`):
 
 ```bash
-# 1. Install all dependencies across workspaces
-npm install
+# Clone the repository
+git clone <repo-url>
+cd Senkron
 
-# 2. Build all packages (AI engine, Web Components, Backend API, Next.js Standalone Demo)
+# Option A: Standard npm workspaces
+npm install
 npm run build
 
-# 3. Start development or production services
-npm start              # Starts Next.js demo on http://localhost:3000
-npm run start:backend  # Starts Express GraphQL API on http://localhost:4000
-
-# 4. Run all monorepo automated test suites
-npm test
+# Option B: Automated build script (handles dependency validation)
+./scripts/build.sh
 ```
 
-### 🐳 Docker & Cloud Deployment
+### 3. Service Commands
 
-Launch the full production stack with one command:
+| Command | Description | Target / Port |
+| :--- | :--- | :--- |
+| `npm run build` | Builds all packages in topological order | Entire Monorepo |
+| `npm start` | Starts Next.js production web server | `http://localhost:3000` |
+| `npm run start:backend` | Starts Express & GraphQL API service | `http://localhost:4000` |
+| `npm run dev` | Starts Next.js demo in development mode | `http://localhost:3000` |
+| `npm run dev:backend` | Starts Backend service with TypeScript watch | `http://localhost:4000` |
+| `npm test` | Runs unit & integration tests across all packages | Vitest (36/36 passed) |
+
+---
+
+## 🐳 Containerization & Production Deployment
+
+### 1. Docker Compose (1-Command Full-Stack)
+Launch both the Next.js standalone web frontend and the Express/FFmpeg backend service with one command:
+
 ```bash
+# Copy and configure environment variables
+cp .env.example .env.local
+
+# Launch the container stack in the background
 docker compose up -d --build
 ```
-- **Web Interface & API:** `http://localhost:3000` (Next.js 14 Standalone Container)
+
+- **Web Application & UI:** `http://localhost:3000` (Next.js 14 Standalone Container, ~120MB)
 - **Backend API & GraphQL:** `http://localhost:4000` (Alpine Node 20 + Native FFmpeg)
 
-For comprehensive guides on Vercel, Railway, Render, Fly.io, and VPS deployments, see [**`DEPLOYMENT.md`**](./DEPLOYMENT.md).
+```bash
+# Stop containers
+docker compose down
+```
+
+### 2. Standalone Next.js Container
+The web demo is configured with Next.js `output: 'standalone'`, producing an ultra-lightweight, self-contained bundle that doesn't require the full monorepo `node_modules` in production:
+
+```bash
+# Build production image
+docker build -t senkron-web:latest -f Dockerfile .
+
+# Run container
+docker run -p 3000:3000 -e NODE_ENV=production senkron-web:latest
+```
+
+### 3. Cloud Deployment Options
+- **Deno Deploy**: Fully configured for the **Next.js Preset** (`jsr:@deno/nextjs-start`). Connect your repo and Deno Deploy runs `deno task build` and auto-serves Next.js with zero manual configuration.
+- **Vercel**: Pre-configured with [`vercel.json`](./vercel.json). Import your GitHub repository to Vercel and it builds automatically.
+- **Railway / Render / Fly.io**: Automatically detects the root [`Dockerfile`](./Dockerfile) and exposes Port 3000.
+- **Self-Hosted VPS (Ubuntu/Debian)**: Deploy with PM2 or systemd behind an Nginx reverse proxy.
+
+👉 For complete step-by-step instructions for each platform, see [**`DEPLOYMENT.md`**](./DEPLOYMENT.md).
 
 ---
 

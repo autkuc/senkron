@@ -30,6 +30,7 @@ COPY . .
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV BUILD_STANDALONE=true
 
 # Coordinated build in topological dependency order
 RUN npm run build

@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
+const isStandalone = process.env.BUILD_STANDALONE === 'true';
+
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  ...(isStandalone ? { output: 'standalone' } : {}),
   transpilePackages: ['@senkron/components'],
   async headers() {
     return [

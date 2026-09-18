@@ -15,15 +15,22 @@
     "build:components": "npm run build -w @senkron/components",
     "build:backend": "npm run build -w @senkron/backend",
     "build:demo": "npm run build -w senkron-demo",
-    "build": "npm run build:ai && npm run build:components && npm run build:backend && npm run build:demo",
+    "build:all": "npm run build:ai && npm run build:components && npm run build:backend && npm run build:demo",
+    "build": "node scripts/deno-deploy-build.js",
     "dev:demo": "npm run dev -w senkron-demo",
     "dev:backend": "npm run dev -w @senkron/backend",
     "dev": "npm run dev -w senkron-demo",
-    "start": "npm run start -w senkron-demo",
+    "start": "next start",
+    "start:demo": "npm run start -w senkron-demo",
     "start:backend": "npm run start -w @senkron/backend",
     "test:ai": "npm run test -w @senkron/ai",
     "test:components": "npm run test -w @senkron/components",
     "test:backend": "npm run test -w @senkron/backend",
     "test": "npm run test:ai && npm run test:components && npm run test:backend"
+  },
+  "dependencies": {
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

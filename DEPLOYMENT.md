@@ -76,7 +76,41 @@ docker run -p 3000:3000 -e NODE_ENV=production senkron-web:latest
 
 ---
 
-## ▲ Option 3: Vercel (1-Click Deployment)
+## 🦕 Option 3: Deno Deploy (Next.js Preset)
+
+Senkron is fully compatible with **Deno Deploy's Next.js Preset** and `jsr:@deno/nextjs-start`.
+
+### 1. Deno Deploy Automatic Preset (Dashboard)
+1. In the [Deno Deploy Dashboard](https://dash.deno.com/new_project), link your GitHub repository.
+2. Under **Project Settings**:
+   - **Framework Preset:** `Next.js`
+   - **Root Directory:** `/` (leave as root)
+   - **Build Task:** Deno Deploy automatically executes `deno task build` from [`deno.json`](./deno.json).
+   - **Entrypoint:** Automatic (`jsr:@deno/nextjs-start`).
+3. Deploy!
+
+### 2. Why it works (Root Monorepo Synchronization)
+- [`deno.json`](./deno.json) configures essential Deno Node compatibility flags:
+  ```json
+  "unstable": ["detect-cjs", "node-globals", "unsafe-proto", "sloppy-imports"]
+  ```
+- [`next.config.mjs`](./next.config.mjs) at the repository root allows Deno Deploy to auto-detect Next.js.
+- `scripts/deno-deploy-build.js` compiles `@senkron/ai`, `@senkron/components`, and `@senkron/backend` in topological order before compiling `senkron-demo`, then synchronizes `.next` and `public` to the repository root where `jsr:@deno/nextjs-start` expects them.
+- Disables standalone mode during Deno Deploy builds, preventing Deno's known `package.json` syntax parser bug with `.next/standalone`.
+
+### 3. Alternative: GitHub Actions Workflow
+If you prefer deploying via CI/CD using `deployctl`, use the included workflow [`.github/workflows/deno-deploy.yml`](./.github/workflows/deno-deploy.yml):
+```yaml
+uses: denoland/deployctl@v1
+with:
+  project: "<your-deno-project-name>"
+  entrypoint: "jsr:@deno/nextjs-start"
+  root: "."
+```
+
+---
+
+## ▲ Option 4: Vercel (1-Click Deployment)
 
 The repository includes [`vercel.json`](./vercel.json) pre-configured with root monorepo build commands.
 
@@ -89,7 +123,7 @@ The repository includes [`vercel.json`](./vercel.json) pre-configured with root 
 
 ---
 
-## ☁️ Option 4: Cloud PaaS (Railway, Render, Fly.io, Cloud Run)
+## ☁️ Option 5: Cloud PaaS (Railway, Render, Fly.io, Cloud Run)
 
 All standard cloud platforms can deploy Senkron directly using the root [`Dockerfile`](./Dockerfile):
 
@@ -110,7 +144,7 @@ All standard cloud platforms can deploy Senkron directly using the root [`Docker
 
 ---
 
-## 🖥️ Option 5: Self-Hosted Linux VPS (Ubuntu / Debian with PM2)
+## 🖥️ Option 6: Self-Hosted Linux VPS (Ubuntu / Debian with PM2)
 
 For hosting on a bare-metal VPS or Cloud VM:
 

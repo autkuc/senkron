@@ -1,0 +1,13 @@
+{
+  "nodeModulesDir": "auto",
+  "unstable": [
+    "detect-cjs",
+    "node-globals",
+    "unsafe-proto",
+    "sloppy-imports"
+  ],
+  "tasks": {
+    "build": "node ../scripts/deno-deploy-build.js",
+    "start": "next start"
+  }
+}
