@@ -6,8 +6,11 @@
     "unsafe-proto",
     "sloppy-imports"
   ],
+  "deploy": {
+    "framework": "nextjs"
+  },
   "tasks": {
-    "build": "node ../scripts/deno-deploy-build.js",
+    "build": "next build",
     "start": "next start"
   }
 }

@@ -1,13 +1,22 @@
 {
   "nodeModulesDir": "auto",
+  "workspace": [
+    "./ai",
+    "./components",
+    "./backend",
+    "./demo"
+  ],
   "unstable": [
     "detect-cjs",
     "node-globals",
     "unsafe-proto",
     "sloppy-imports"
   ],
+  "deploy": {
+    "framework": "nextjs"
+  },
   "tasks": {
-    "build": "node scripts/deno-deploy-build.js",
-    "start": "next start"
+    "build": "node scripts/deno-deploy-build.js || deno run -A scripts/deno-deploy-build.js",
+    "start": "next start demo"
   }
 }

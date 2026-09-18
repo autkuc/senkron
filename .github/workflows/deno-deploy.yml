@@ -4,38 +4,81 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Deno Deploy Project Name'
+        required: false
+        default: 'senkron'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for OIDC authentication with Deno Deploy
+      id-token: write # Required for GitHub OIDC auth
       contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check Authentication Configuration
+        id: auth_check
+        run: |
+          if [ -n "${{ secrets.DENO_DEPLOY_TOKEN }}" ]; then
+            echo "has_auth=true" >> $GITHUB_OUTPUT
+            echo "✓ Found DENO_DEPLOY_TOKEN secret."
+          else
+            echo "has_auth=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No DENO_DEPLOY_TOKEN secret configured."
+          fi
+
       - name: Setup Node.js
+        if: steps.auth_check.outputs.has_auth == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
+        if: steps.auth_check.outputs.has_auth == 'true' || github.event_name == 'workflow_dispatch'
         run: npm install
 
-      - name: Build Senkron Monorepo (Next.js & Workspaces)
+      - name: Build Senkron Monorepo
+        if: steps.auth_check.outputs.has_auth == 'true' || github.event_name == 'workflow_dispatch'
         run: npm run build
 
       - name: Setup Deno
+        if: steps.auth_check.outputs.has_auth == 'true' || github.event_name == 'workflow_dispatch'
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
 
-      - name: Deploy to Deno Deploy
+      - name: Deploy to Deno Deploy (with Token)
+        if: steps.auth_check.outputs.has_auth == 'true'
         uses: denoland/deployctl@v1
         with:
-          project: "senkron"
+          project: ${{ inputs.project_name || secrets.DENO_PROJECT_NAME || 'senkron' }}
           entrypoint: "jsr:@deno/nextjs-start"
           root: "."
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+
+      - name: Deploy to Deno Deploy (with GitHub OIDC)
+        if: steps.auth_check.outputs.has_auth != 'true' && github.event_name == 'workflow_dispatch'
+        uses: denoland/deployctl@v1
+        with:
+          project: ${{ inputs.project_name || 'senkron' }}
+          entrypoint: "jsr:@deno/nextjs-start"
+          root: "."
+
+      - name: Notice when Auth is Missing
+        if: steps.auth_check.outputs.has_auth != 'true' && github.event_name != 'workflow_dispatch'
+        run: |
+          echo "================================================================================="
+          echo "ℹ️  NOTICE: Deno Deploy GitHub Action skipped because no auth is configured."
+          echo "To enable automated deployment on push:"
+          echo "  1. Generate a token at https://dash.deno.com/account#access-tokens"
+          echo "  2. Add it to GitHub repository Secrets as DENO_DEPLOY_TOKEN"
+          echo "  3. (Optional) Add DENO_PROJECT_NAME secret matching your Deno Deploy project"
+          echo "Alternatively, use Deno Deploy's native GitHub Integration on dash.deno.com"
+          echo "================================================================================="
