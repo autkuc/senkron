@@ -1,12 +1,12 @@
-# 🚀 Senkron Deployment & Build Guide
+# 🚀 Senkron Production Deployment Guide
 
-This document explains how to build, containerize, and deploy the Senkron platform across various environments.
+This guide explains how to build and deploy Senkron on a standard Linux VPS or server using pure **Node.js, npm workspaces, and process managers (PM2 / systemd)**.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-The Senkron repository is an **npm workspace monorepo** consisting of:
+Senkron is a pure **npm workspace monorepo** consisting of:
 
 | Package | Path | Role | Tech Stack |
 | :--- | :--- | :--- | :--- |
@@ -17,21 +17,23 @@ The Senkron repository is an **npm workspace monorepo** consisting of:
 
 ---
 
-## ⚡ Option 1: 1-Command Local Build & Run
+## ⚡ Local Development & Build
 
-### 1. Build Everything
-From the repository root, install dependencies and build all packages in topological order:
+### 1. Install & Build
+From the repository root:
 
 ```bash
-# Using npm workspaces
+# Install all workspace dependencies
 npm install
+
+# Build all packages in topological order (@senkron/ai -> @senkron/components -> @senkron/backend -> senkron-demo)
 npm run build
 
-# Or use the helper script
+# Or use the helper script:
 ./scripts/build.sh
 ```
 
-### 2. Start Services
+### 2. Start Local Services
 - **Start Web Demo (Port 3000):**
   ```bash
   npm start
@@ -40,148 +42,130 @@ npm run build
   ```bash
   npm run start:backend
   ```
-- **Run all automated tests:**
+- **Run automated test suites:**
   ```bash
   npm test
   ```
 
 ---
 
-## 🐳 Option 2: Docker & Docker Compose (Recommended for Production)
+## 🖥️ Production VPS Deployment (Ubuntu / Debian)
 
-Senkron includes multi-stage, production-hardened Dockerfiles with **Next.js Standalone** bundling and non-root execution.
+### 1. Prerequisites on VPS
+Install Node.js 20+, FFmpeg (for optional server-side fallback rendering), and PM2:
 
-### Single-Command Stack Deployment:
 ```bash
-docker compose up -d --build
-```
-
-This starts:
-- **`senkron-web`** at `http://localhost:3000` (Next.js 14 standalone container, ~120MB image size)
-- **`senkron-backend`** at `http://localhost:4000` (Express + GraphQL + native Alpine `ffmpeg`)
-
-To stop:
-```bash
-docker compose down
-```
-
-### Building & Running Standalone Docker Container:
-```bash
-# Build Web Image
-docker build -t senkron-web:latest -f Dockerfile .
-
-# Run Web Image
-docker run -p 3000:3000 -e NODE_ENV=production senkron-web:latest
-```
-
----
-
-## 🦕 Option 3: Deno Deploy (Next.js Preset)
-
-Senkron is fully compatible with **Deno Deploy's Next.js Preset** and `jsr:@deno/nextjs-start`.
-
-### 1. Deno Deploy Automatic Preset (Dashboard)
-1. In the [Deno Deploy Dashboard](https://dash.deno.com/new_project), link your GitHub repository.
-2. Under **Project Settings**:
-   - **Framework Preset:** `Next.js`
-   - **Root Directory:** `/` (leave as root)
-   - **Build Task:** Deno Deploy automatically executes `deno task build` from [`deno.json`](./deno.json).
-   - **Entrypoint:** Automatic (`jsr:@deno/nextjs-start`).
-3. Deploy!
-
-### 2. Why it works (Root Monorepo Synchronization)
-- [`deno.json`](./deno.json) configures essential Deno Node compatibility flags:
-  ```json
-  "unstable": ["detect-cjs", "node-globals", "unsafe-proto", "sloppy-imports"]
-  ```
-- [`next.config.mjs`](./next.config.mjs) at the repository root allows Deno Deploy to auto-detect Next.js.
-- `scripts/deno-deploy-build.js` compiles `@senkron/ai`, `@senkron/components`, and `@senkron/backend` in topological order before compiling `senkron-demo`, then synchronizes `.next` and `public` to the repository root where `jsr:@deno/nextjs-start` expects them.
-- Disables standalone mode during Deno Deploy builds, preventing Deno's known `package.json` syntax parser bug with `.next/standalone`.
-
-### 3. Alternative: GitHub Actions Workflow
-If you prefer deploying via CI/CD using `deployctl`, use the included workflow [`.github/workflows/deno-deploy.yml`](./.github/workflows/deno-deploy.yml):
-```yaml
-uses: denoland/deployctl@v1
-with:
-  project: "<your-deno-project-name>"
-  entrypoint: "jsr:@deno/nextjs-start"
-  root: "."
-```
-
----
-
-## ▲ Option 4: Vercel (1-Click Deployment)
-
-The repository includes [`vercel.json`](./vercel.json) pre-configured with root monorepo build commands.
-
-1. Connect your GitHub repository to Vercel.
-2. Ensure the Framework Preset is set to **Next.js**.
-3. Vercel will automatically read `vercel.json`:
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `demo/.next`
-4. Configure environment variables (e.g. `MODAL_LLM_ENDPOINT`) in the Vercel Dashboard under **Project Settings > Environment Variables**.
-
----
-
-## ☁️ Option 5: Cloud PaaS (Railway, Render, Fly.io, Cloud Run)
-
-All standard cloud platforms can deploy Senkron directly using the root [`Dockerfile`](./Dockerfile):
-
-- **Railway / Render:**
-  - Create a new Web Service pointing to your repository.
-  - Set Build Type to **Dockerfile**.
-  - Railway / Render automatically detects the root multi-stage Dockerfile and exposes Port 3000.
-- **Fly.io:**
-  ```bash
-  fly launch --dockerfile Dockerfile
-  fly deploy
-  ```
-- **Google Cloud Run:**
-  ```bash
-  gcloud builds submit --tag gcr.io/[PROJECT-ID]/senkron-web
-  gcloud run deploy senkron-web --image gcr.io/[PROJECT-ID]/senkron-web --port 3000 --allow-unauthenticated
-  ```
-
----
-
-## 🖥️ Option 6: Self-Hosted Linux VPS (Ubuntu / Debian with PM2)
-
-For hosting on a bare-metal VPS or Cloud VM:
-
-### 1. Setup Node.js & PM2:
-```bash
+# Install Node.js 20 LTS
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs ffmpeg
+sudo apt-get install -y nodejs ffmpeg git
+
+# Verify installation
+node -v # v20.x.x
+npm -v  # 10.x.x
+
+# Install PM2 globally
 sudo npm install -g pm2
 ```
 
-### 2. Clone & Build:
+### 2. Clone & Build
 ```bash
+# Clone repository
 git clone <your-repo-url> /opt/senkron
 cd /opt/senkron
+
+# Configure environment variables
+cp .env.example .env.local
+
+# Install dependencies and build
 npm install
 npm run build
 ```
 
-### 3. Start with PM2:
+### 3. Process Management with PM2
+Run both the Web application and Backend API with automatic restarts and zero-downtime reloads:
+
 ```bash
-# Start Next.js Web App
+# Start Next.js Web App (Port 3000)
 pm2 start "npm start" --name "senkron-web"
 
-# Start Backend Service
+# Start Backend API (Port 4000)
 pm2 start "npm run start:backend" --name "senkron-backend"
 
-# Save PM2 process list across reboots
+# Persist processes across server reboots
 pm2 save
 pm2 startup
 ```
 
-### 4. Nginx Reverse Proxy Configuration:
+Useful PM2 commands:
+```bash
+pm2 status          # View status of running services
+pm2 logs            # View live logs
+pm2 restart all     # Restart all services
+```
+
+---
+
+## 🌐 Alternative: systemd Service Configuration
+
+If you prefer Linux `systemd` over PM2:
+
+### 1. Create Web Service (`/etc/systemd/system/senkron-web.service`):
+```ini
+[Unit]
+Description=Senkron Next.js Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/senkron
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 2. Create Backend Service (`/etc/systemd/system/senkron-backend.service`):
+```ini
+[Unit]
+Description=Senkron Express & GraphQL Backend
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/senkron
+ExecStart=/usr/bin/npm run start:backend
+Restart=on-failure
+Environment=NODE_ENV=production
+Environment=PORT=4000
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 3. Enable & Start:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now senkron-web
+sudo systemctl enable --now senkron-backend
+```
+
+---
+
+## 🔒 Nginx Reverse Proxy & SSL
+
+Configure Nginx as a reverse proxy in front of Next.js and the Backend:
+
 ```nginx
 server {
     listen 80;
     server_name yourdomain.com;
 
+    # Next.js Web App & WebAssembly COOP/COEP headers
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
@@ -191,6 +175,7 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 
+    # Express / GraphQL Backend
     location /graphql {
         proxy_pass http://localhost:4000/graphql;
         proxy_http_version 1.1;
@@ -199,11 +184,15 @@ server {
 }
 ```
 
+Enable SSL via Certbot:
+```bash
+sudo apt-get install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com
+```
+
 ---
 
 ## ⚙️ Environment Variables Reference
-
-Copy `.env.example` to `.env.local` or provide these variables in your deployment platform:
 
 | Variable | Default | Purpose |
 | :--- | :--- | :--- |

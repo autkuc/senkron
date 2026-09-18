@@ -63,13 +63,9 @@ Senkron solves the two largest cost and infrastructure bottlenecks in social pla
 ```
 Senkron/
 ├── package.json         # Root monorepo orchestration & npm workspaces
-├── docker-compose.yml   # Multi-container orchestration (Web + Backend)
-├── Dockerfile           # Multi-stage production container for Next.js Web App
-├── Dockerfile.backend   # Multi-stage production container for Backend microservice
-├── vercel.json          # 1-Click Vercel cloud deployment config
 ├── .env.example         # Production environment variables template
-├── DEPLOYMENT.md        # Comprehensive deployment & production operations manual
-├── scripts/             # Automated CI/CD and deployment build pipelines
+├── DEPLOYMENT.md        # Comprehensive VPS & production operations manual
+├── scripts/             # Automated build pipeline
 │   └── build.sh
 ├── components/          # Standalone UI Web Components & React wrappers (@senkron/components)
 │   ├── src/
@@ -263,7 +259,6 @@ Senkron is organized as an **npm workspace monorepo** with coordinated multi-pac
 ### 1. Prerequisites
 - **Node.js**: `v20.x` or higher
 - **npm**: `v10.x` or higher
-- *(Optional)* **Docker & Docker Compose**: For containerized deployment
 
 ### 2. Monorepo Build Pipeline
 Install dependencies and build all packages in topological order (`@senkron/ai` → `@senkron/components` → `@senkron/backend` → `senkron-demo`):
@@ -294,45 +289,25 @@ npm run build
 
 ---
 
-## 🐳 Containerization & Production Deployment
+## 🖥️ Production VPS Deployment (PM2 / systemd)
 
-### 1. Docker Compose (1-Command Full-Stack)
-Launch both the Next.js standalone web frontend and the Express/FFmpeg backend service with one command:
-
-```bash
-# Copy and configure environment variables
-cp .env.example .env.local
-
-# Launch the container stack in the background
-docker compose up -d --build
-```
-
-- **Web Application & UI:** `http://localhost:3000` (Next.js 14 Standalone Container, ~120MB)
-- **Backend API & GraphQL:** `http://localhost:4000` (Alpine Node 20 + Native FFmpeg)
+Run both the Next.js frontend and Express/FFmpeg backend as managed background processes on any Linux VPS:
 
 ```bash
-# Stop containers
-docker compose down
+# 1. Install dependencies & build
+npm install
+npm run build
+
+# 2. Start services with PM2
+pm2 start "npm start" --name "senkron-web"
+pm2 start "npm run start:backend" --name "senkron-backend"
+
+# 3. Save process list across server reboots
+pm2 save
+pm2 startup
 ```
 
-### 2. Standalone Next.js Container
-The web demo is configured with Next.js `output: 'standalone'`, producing an ultra-lightweight, self-contained bundle that doesn't require the full monorepo `node_modules` in production:
-
-```bash
-# Build production image
-docker build -t senkron-web:latest -f Dockerfile .
-
-# Run container
-docker run -p 3000:3000 -e NODE_ENV=production senkron-web:latest
-```
-
-### 3. Cloud Deployment Options
-- **Deno Deploy**: Fully configured for the **Next.js Preset** (`jsr:@deno/nextjs-start`). Connect your repo and Deno Deploy runs `deno task build` and auto-serves Next.js with zero manual configuration.
-- **Vercel**: Pre-configured with [`vercel.json`](./vercel.json). Import your GitHub repository to Vercel and it builds automatically.
-- **Railway / Render / Fly.io**: Automatically detects the root [`Dockerfile`](./Dockerfile) and exposes Port 3000.
-- **Self-Hosted VPS (Ubuntu/Debian)**: Deploy with PM2 or systemd behind an Nginx reverse proxy.
-
-👉 For complete step-by-step instructions for each platform, see [**`DEPLOYMENT.md`**](./DEPLOYMENT.md).
+👉 For complete systemd service files, Nginx reverse proxy configuration, and SSL setup, see [**`DEPLOYMENT.md`**](./DEPLOYMENT.md).
 
 ---
 

@@ -8,7 +8,7 @@ const monorepoRoot = path.resolve(__dirname, '..');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Deno Deploy and Docker require standalone output mode
+  // Standalone output mode for VPS production
   output: 'standalone',
   transpilePackages: ['@senkron/components'],
   experimental: {
